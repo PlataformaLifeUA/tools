@@ -15,7 +15,7 @@ import logging
 from tqdm import tqdm
 from spacy import data
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_md")
 stop_words = set(stopwords.words('english'))
 
 def expand_contractions(phrase):
