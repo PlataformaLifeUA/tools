@@ -12,8 +12,8 @@ from collections import defaultdict
 import spacy
 from word2number import w2n
 import logging
-import en_core_web_sm
 from tqdm import tqdm
+from spacy import data
 
 nlp = spacy.load("en_core_web_sm")
 stop_words = set(stopwords.words('english'))
