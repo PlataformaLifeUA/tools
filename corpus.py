@@ -1,5 +1,5 @@
 import csv
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any
 
 from gensim.corpora import Dictionary
 from pandas import DataFrame
@@ -18,9 +18,9 @@ def corpus2bow(corpus: List[List[str]], dictionary: Dictionary) -> List[List[Tup
     return bow_corpus
 
 
-def bow2matrix(bow: List[List[Tuple[int, int]]], dictionary: Dictionary) -> csc_matrix:
-    M = csc_matrix((len(bow), len(dictionary)))
-    for i, sample in enumerate(bow):
+def features2matrix(samples: List[List[Tuple[int, Any]]], dictionary: Dictionary) -> csc_matrix:
+    M = csc_matrix((len(samples), len(dictionary)))
+    for i, sample in enumerate(samples):
         for token in sample:
             M[i, token[0]] = token[1]
     return M
@@ -32,7 +32,7 @@ def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary) -> csc_matrix
     :param corpus: The corpus which contains FeaturedSample objects.
     :return: A sparse matrix which each row represents a sample and each column the each feature of that sample.
     """
-    return bow2matrix(corpus2bow(corpus, dictionary), dictionary)
+    return features2matrix(corpus2bow(corpus, dictionary), dictionary)
 
 
 def get_feature_text(doc, feature_name: str) -> str:
