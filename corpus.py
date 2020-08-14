@@ -71,7 +71,7 @@ def download() -> Dict[str, List[str]]:
             corpus['Alert level'].append(alert_level)
             corpus['Message types'].append(msg_types)
 
-        return corpus
+    return corpus
 
 
 def save_corpus(corpus, fname: str, encoding: str = 'utf-8') -> None:

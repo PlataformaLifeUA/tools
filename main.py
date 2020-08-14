@@ -1,3 +1,4 @@
+from os import mkdir
 from os.path import exists
 
 from corpus import download, load_life_corpus, save_corpus, corpus2matrix
@@ -11,6 +12,8 @@ from utils import translate
 
 log = logging.getLogger(__name__)
 
+if not exists('data/'):
+    mkdir('data')
 if not exists('data/life_corpus.csv'):
     corpus = download()
     save_corpus(corpus, 'data/life_corpus.csv')
