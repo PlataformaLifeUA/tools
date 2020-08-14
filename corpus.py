@@ -4,6 +4,7 @@ from typing import List, Tuple, Dict
 from gensim.corpora import Dictionary
 from pandas import DataFrame
 import requests
+from scipy.sparse import csc_matrix
 from tqdm import tqdm
 from lxml import html, etree
 
@@ -15,6 +16,23 @@ def corpus2bow(corpus: List[List[str]], dictionary: Dictionary) -> List[List[Tup
     for sample in tqdm(corpus, desc='Obtaining the corpus BoW'):
         bow_corpus.append(dictionary.doc2bow(sample))
     return bow_corpus
+
+
+def bow2matrix(bow: List[List[Tuple[int, int]]], dictionary: Dictionary) -> csc_matrix:
+    M = csc_matrix((len(bow), len(dictionary)))
+    for i, sample in enumerate(bow):
+        for token in sample:
+            M[i, token[0]] = token[1]
+    return M
+
+
+def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary) -> csc_matrix:
+    """
+    Convert a corpus to a sparse matrix.
+    :param corpus: The corpus which contains FeaturedSample objects.
+    :return: A sparse matrix which each row represents a sample and each column the each feature of that sample.
+    """
+    return bow2matrix(corpus2bow(corpus, dictionary), dictionary)
 
 
 def get_feature_text(doc, feature_name: str) -> str:

@@ -1,14 +1,11 @@
 from os.path import exists
 
-from scipy.sparse import csc_matrix
-
-from corpus import corpus2bow, download, load_life_corpus, save_corpus
-from preproc import load_corpus, preprocess_corpus, preprocess
+from corpus import download, load_life_corpus, save_corpus, corpus2matrix
+from eval import evaluate, metrics, print_metrics
+from preproc import preprocess_corpus, preprocess
 from gensim.corpora import Dictionary
-from tqdm import tqdm
 import logging
 from sklearn.svm import SVC
-from numpy import matrix
 
 from utils import translate
 
@@ -25,22 +22,13 @@ else:
     corpus = load_life_corpus('data/life_corpus_en.csv')
 
 train_corpus = preprocess_corpus(corpus['Text'])
-classes = [0 if cls.lower() == 'no risk' else 1 for cls in corpus['Alert level']]
 dictionary = Dictionary(train_corpus)
-bow_corpus = corpus2bow(train_corpus, dictionary)
+X_train = corpus2matrix(train_corpus, dictionary)
+y_train = [0 if cls.lower() == 'no risk' else 1 for cls in corpus['Alert level']]
+
 ml = SVC()
+ml.fit(X_train, y_train)
 
-
-def corpus2matrix(corpus, dictionary):
-    m = csc_matrix((len(corpus), len(dictionary)))
-    for i, sample in enumerate(corpus):
-        for token in sample:
-            m[i, token[0]] = token[1]
-    return m
-
-
-m = corpus2matrix(bow_corpus, dictionary)
-
-ml.fit(m, classes)
-X = corpus2matrix(corpus2bow([preprocess("I hate feeling good for a while, and from one moment to the next having a horrible anguish, wanting to cry, just thinking about bullshit.")], dictionary), dictionary)
-print('Result:', ml.predict(X[0]))
+y_pred = evaluate(X_train, ml)
+measures = metrics(y_train, y_pred)
+print_metrics(measures)

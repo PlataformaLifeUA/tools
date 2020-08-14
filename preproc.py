@@ -18,48 +18,58 @@ from spacy import data
 nlp = spacy.load("en_core_web_md")
 stop_words = set(stopwords.words('english'))
 
-def expand_contractions(phrase):
+
+def expand_contractions(text: str) -> str:
     """
-    Expandir contracciones.
+    Expand contractions.
+
+    :param text: the text with the contractions.
+    :return: the text with the expanded contractions.
     """
     # specific
-    phrase = re.sub(r"\ '", "'", phrase)
-    phrase = re.sub(r"\/", " ", phrase)
-    phrase = re.sub(r"\’", "'", phrase)
-    phrase = re.sub(r"won\'t", "will not", phrase)
-    phrase = re.sub(r"can\'t", "can not", phrase)
-    phrase = re.sub(r"a\'t", "can not", phrase)
+    text = re.sub(r"\ '", "'", text)
+    text = re.sub(r"\/", " ", text)
+    text = re.sub(r"\’", "'", text)
+    text = re.sub(r"won\'t", "will not", text)
+    text = re.sub(r"can\'t", "can not", text)
+    text = re.sub(r"a\'t", "can not", text)
     # general
-    phrase = re.sub(r"n\'t", " not", phrase)
-    phrase = re.sub(r"\'re", " are", phrase)
-    phrase = re.sub(r"\'s", " is", phrase)
-    phrase = re.sub(r"\'d", " would", phrase)
-    phrase = re.sub(r"\'ll", " will", phrase)
-    phrase = re.sub(r"\'t", " not", phrase)
-    phrase = re.sub(r"\'ve", " have", phrase)
-    phrase = re.sub(r"\'m", " am", phrase)
-    return phrase
+    text = re.sub(r"n\'t", " not", text)
+    text = re.sub(r"\'re", " are", text)
+    text = re.sub(r"\'s", " is", text)
+    text = re.sub(r"\'d", " would", text)
+    text = re.sub(r"\'ll", " will", text)
+    text = re.sub(r"\'t", " not", text)
+    text = re.sub(r"\'ve", " have", text)
+    text = re.sub(r"\'m", " am", text)
+    return text
 
 
-def strip_html_tags(text):
+def strip_html_tags(text: str) -> str:
     """
-    Removing strip html tgs.
+    Removing strip html tags.
+    :param text: A text with HTML tags.
+    :return: The same text without those HTML togs.
     """
     soup = BeautifulSoup(text, "html.parser")
     stripped_text = soup.get_text(separator=" ")
     return stripped_text
 
-def remove_accented_chars(text):
+
+def remove_accented_chars(text: str) -> str:
     """
-    Convierte caracteres acentuados en caracteres ASCII.
-    Funciona principalmente para idioma español.
+    Convert accented characters into ASCII characters. It works mainly for latin languages.
+    :param text: The text with accented characters.
+    :return: The same text with with unicode representation of the accented characters.
     """
     return unidecode(text)
 
 
-def remove_special_characters(text):
+def remove_special_characters(text: str) -> str:
     """
-    Eliminar caracteres especiales
+    Remove spcial characters.
+    :param text: The text with special characters.
+    :return: the cleaned text.
     """
     nstr = re.sub(r'[?|$|.|!]', r'', text)
     nestr = re.sub(r'[^a-zA-Z0-9 ]', r'', nstr)
@@ -76,6 +86,7 @@ def removing_words_number(text):
     resultwords = [word for word in querywords if word.lower() not in stopwords]
     result = ' '.join(resultwords)
     return result
+
 
 def remove_number(text):
     """
@@ -131,19 +142,25 @@ def preprocess(text: str) -> str:
     return text
 
 
-def load_corpus(fname: str, encoding: str = 'utf-8') -> List[List[str]]:
+def load_corpus(fname: str, encoding: str = 'utf-8') -> List[str]:
+    """
+    Load the corpus from a CSV file.
+    :param fname: the path to the CSV file.
+    :param encoding: the text encoding.
+    :return: the corpus
+    """
     corpus = []
     with open(fname, "r", encoding=encoding) as File:
         reader = csv.DictReader(File)
         for row in tqdm(reader, desc='Loading the corpus'):
             title = preprocess(row['title'])
             body = preprocess(row['body'])
-            # Agrega valor al corpus
+            # Join the title and body
             corpus.append(title + body)
     return corpus
 
 
-def preprocess_corpus(corpus: List[str]):
+def preprocess_corpus(corpus: List[str]) -> List[List[str]]:
     result = []
     for sample in tqdm(corpus, desc='Preprocesing the corpus.'):
         result.append(preprocess(sample))

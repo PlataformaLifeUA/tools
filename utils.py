@@ -12,3 +12,12 @@ def translate(corpus: Dict[str, List[str]], src: str, dest: str) -> Dict[str, Li
             languages[i] = dest
             texts[i] = translator.translate(texts[i], dest=dest, src=src).text
     return corpus
+
+
+def format_value(value: float) -> str:
+    """
+    Format the metrics.
+    :param value: The value to format.
+    :return: The formated value.
+    """
+    return '{0:.2f}%'.format(value * 100)
