@@ -1,4 +1,5 @@
 import csv
+from random import randint
 from typing import List, Tuple, Dict, Any
 
 from gensim.corpora import Dictionary
@@ -7,6 +8,8 @@ import requests
 from scipy.sparse import csc_matrix
 from tqdm import tqdm
 from lxml import html, etree
+
+from preproc import preprocess_corpus
 
 URL = 'https://github.com/PlataformaLifeUA/corpus'
 
@@ -95,3 +98,21 @@ def load_life_corpus(fname: str, encoding: str = 'utf-8') -> Dict[str, List[str]
             corpus['Message types'].append(row['Message types'])
 
     return corpus
+
+
+def divide_corpus(corpus:  Dict[str, List[str]], ratio: float = 0.9):
+    train_corpus = preprocess_corpus(corpus['Text'])
+    y_train = [0 if cls.lower() == 'no risk' else 1 for cls in corpus['Alert level']]
+    train_size = int(len(train_corpus) * ratio)
+    test_size = len(train_corpus) - train_size
+    # Generate a random index from 0 to len(train_corpus)
+    test_corpus = []
+    y_test = []
+    while len(train_corpus) > train_size:
+        i = randint(0, len(train_corpus) - 1)
+        test_corpus.append(train_corpus[i])
+        y_test.append(y_train[i])
+        del train_corpus[i]
+        del y_train[i]
+
+    return train_corpus, test_corpus, y_train, y_test

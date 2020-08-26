@@ -1,7 +1,8 @@
 from os import mkdir
 from os.path import exists
+from typing import List, Dict
 
-from corpus import download, load_life_corpus, save_corpus, corpus2matrix
+from corpus import download, load_life_corpus, save_corpus, corpus2matrix, divide_corpus
 from eval import evaluate, metrics, print_metrics
 from preproc import preprocess_corpus, preprocess
 from gensim.corpora import Dictionary
@@ -24,14 +25,25 @@ if not exists('data/life_corpus_en.csv'):
 else:
     corpus = load_life_corpus('data/life_corpus_en.csv')
 
-train_corpus = preprocess_corpus(corpus['Text'])
-dictionary = Dictionary(train_corpus)
-X_train = corpus2matrix(train_corpus, dictionary)
-y_train = [0 if cls.lower() == 'no risk' else 1 for cls in corpus['Alert level']]
 
-ml = SVC()
-ml.fit(X_train, y_train)
+def cross_validation(corpus:  Dict[str, List[str]], folders: int = 10):
+    sum_measures = {}
+    for i in range(folders):
+        train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
+        dictionary = Dictionary(train_corpus)
+        X_train = corpus2matrix(train_corpus, dictionary)
+        X_test = corpus2matrix(test_corpus, dictionary)
 
-y_pred = evaluate(X_train, ml)
-measures = metrics(y_train, y_pred)
+        ml = SVC()
+        ml.fit(X_train, y_train)
+
+        y_pred = evaluate(X_test, ml)
+        measures = metrics(y_test, y_pred)
+        increase_measures(sum_measures, measures)
+
+    return div_measures(sum_measures, folders)
+
+
+measures = cross_validation(corpus, 10)
+
 print_metrics(measures)
