@@ -26,6 +26,21 @@ else:
     corpus = load_life_corpus('data/life_corpus_en.csv')
 
 
+def increase_measures(total_measures: dict, measures: dict):
+    for key, value in measures.items():
+        if key in total_measures:
+            total_measures[key] += value
+        else:
+            total_measures[key] = value
+
+
+def div_measures(total_measures: dict, divisor: int) -> dict:
+    measures = {}
+    for key, value in total_measures.items():
+        measures[key] = value / divisor
+    return measures
+
+
 def cross_validation(corpus:  Dict[str, List[str]], folders: int = 10):
     sum_measures = {}
     for i in range(folders):
