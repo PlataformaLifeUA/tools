@@ -13,18 +13,6 @@ from utils import translate
 
 log = logging.getLogger(__name__)
 
-if not exists('data/'):
-    mkdir('data')
-if not exists('data/life_corpus.csv'):
-    corpus = download()
-    save_corpus(corpus, 'data/life_corpus.csv')
-if not exists('data/life_corpus_en.csv'):
-    corpus = load_life_corpus('data/life_corpus.csv')
-    corpus = translate(corpus, 'es', 'en')
-    save_corpus(corpus, 'data/life_corpus_en.csv')
-else:
-    corpus = load_life_corpus('data/life_corpus_en.csv')
-
 
 def increase_measures(total_measures: dict, measures: dict):
     for key, value in measures.items():
@@ -59,6 +47,23 @@ def cross_validation(corpus:  Dict[str, List[str]], folders: int = 10):
     return div_measures(sum_measures, folders)
 
 
-measures = cross_validation(corpus, 10)
+def main():
+    if not exists('data/'):
+        mkdir('data')
+    if not exists('data/life_corpus.csv'):
+        corpus = download()
+        save_corpus(corpus, 'data/life_corpus.csv')
+    if not exists('data/life_corpus_en.csv'):
+        corpus = load_life_corpus('data/life_corpus.csv')
+        corpus = translate(corpus, 'es', 'en')
+        save_corpus(corpus, 'data/life_corpus_en.csv')
+    else:
+        corpus = load_life_corpus('data/life_corpus_en.csv')
 
-print_metrics(measures)
+    measures = cross_validation(corpus, 10)
+
+    print_metrics(measures)
+
+
+if __name__ == '__main__':
+    main()
