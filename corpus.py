@@ -3,6 +3,7 @@ from random import randint
 from typing import List, Tuple, Dict, Any
 
 from gensim.corpora import Dictionary
+from gensim import models
 from pandas import DataFrame
 import requests
 from scipy.sparse import csc_matrix
@@ -29,13 +30,29 @@ def features2matrix(samples: List[List[Tuple[int, Any]]], dictionary: Dictionary
     return M
 
 
-def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary) -> csc_matrix:
+def bow2tfidf(bow_corpus):
+    tfidf = models.TfidfModel(bow_corpus)
+    tfidf_corpus = []
+    for doc in bow_corpus:
+        tfidf_corpus.append(tfidf[doc])
+    return tfidf_corpus
+
+
+def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'BoW') -> csc_matrix:
     """
     Convert a corpus to a sparse matrix.
     :param corpus: The corpus which contains FeaturedSample objects.
     :return: A sparse matrix which each row represents a sample and each column the each feature of that sample.
     """
-    return features2matrix(corpus2bow(corpus, dictionary), dictionary)
+    bow_corpus = corpus2bow(corpus, dictionary)
+    if method == 'BoW':
+        return features2matrix(bow_corpus, dictionary)
+    tfidf_corpus = bow2tfidf(bow_corpus)
+    if method == 'TF/IDF':
+        return features2matrix(tfidf_corpus, dictionary)
+    # lsi_corpus = ...
+    # lda_corpus = ...
+    return features2matrix(bow_corpus, dictionary)
 
 
 def get_feature_text(doc, feature_name: str) -> str:

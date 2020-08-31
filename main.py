@@ -34,8 +34,8 @@ def cross_validation(corpus:  Dict[str, List[str]], folders: int = 10):
     for i in range(folders):
         train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
         dictionary = Dictionary(train_corpus)
-        X_train = corpus2matrix(train_corpus, dictionary)
-        X_test = corpus2matrix(test_corpus, dictionary)
+        X_train = corpus2matrix(train_corpus, dictionary, 'TF/IDF')
+        X_test = corpus2matrix(test_corpus, dictionary, 'TF/IDF')
 
         ml = SVC()
         ml.fit(X_train, y_train)
