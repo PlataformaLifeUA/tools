@@ -88,7 +88,7 @@ def main():
     finish = False
     it = 1
     while not finish:
-        detected = detect_suicide_messages(corpus, texts)
+        detected = detect_suicide_messages(corpus, texts, 0.2 ** it)
         if detected:
             for i, confidence in reversed(detected):
                 text = texts[i]
@@ -97,19 +97,19 @@ def main():
                 corpus['Text'].append(text)
                 corpus['Alert level'].append('Urgent')
                 corpus['Message types'].append('Undefined')
-                results.append((confidence ** it, text))
+                results.append((it, confidence, text))
         else:
             finish = True
         it += 1
 
     with open('data/result.csv', 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Confidence', 'Text'])
+        writer.writerow(['Iteration', 'Confidence', 'Text'])
         for result in results:
             writer.writerow(result)
 
 
-def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str]) -> List[int]:
+def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str], confidence: float) -> List[int]:
     train_corpus, _, y_train, _ = divide_corpus(corpus, 1)
     dictionary = Dictionary(train_corpus)
     ml = create_ml(dictionary, train_corpus, y_train)
@@ -122,7 +122,7 @@ def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str]) -> L
         tfidf_sample = tfidf[bow_sample]
         X = features2matrix([tfidf_sample], dictionary)
         y = ml.predict_proba(X[0])
-        if y[0][1] > 0.8:
+        if y[0][0] <= confidence:
             detected.append((i, y[0][1]))
     return detected
 
