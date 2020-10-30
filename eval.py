@@ -1,7 +1,7 @@
 from sys import stdout
 from typing import List, Dict, TextIO
 
-from scipy.sparse import csc_matrix
+from scipy.sparse import lil_matrix
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, \
     jaccard_score
 
@@ -26,7 +26,7 @@ ALL_METRICS = (SIMPLE_ACCURACY, BALANCED_ACCURACY, MICRO_F1, MACRO_F1, WEIGHTED_
                WEIGHTED_JACCARD)
 
 
-def evaluate(corpus: csc_matrix, ml) -> List[int]:
+def evaluate(corpus: lil_matrix, ml) -> List[int]:
     """
     Evaluate this classifier from a corpus of questions.
     :param questions: A corpus which contains the class and text of each question as samples.
