@@ -6,7 +6,7 @@ from gensim.corpora import Dictionary
 from gensim import models
 from pandas import DataFrame
 import requests
-from scipy.sparse import csc_matrix
+from scipy.sparse import lil_matrix
 from tqdm import tqdm
 from lxml import html, etree
 
@@ -22,8 +22,8 @@ def corpus2bow(corpus: List[List[str]], dictionary: Dictionary) -> List[List[Tup
     return bow_corpus
 
 
-def features2matrix(samples: List[List[Tuple[int, Any]]], dictionary: Dictionary) -> csc_matrix:
-    M = csc_matrix((len(samples), len(dictionary)))
+def features2matrix(samples: List[List[Tuple[int, Any]]], dictionary: Dictionary) -> lil_matrix:
+    M = lil_matrix((len(samples), len(dictionary)))
     for i, sample in enumerate(samples):
         for token in sample:
             M[i, token[0]] = token[1]
@@ -38,7 +38,7 @@ def bow2tfidf(bow_corpus):
     return tfidf_corpus
 
 
-def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'BoW') -> csc_matrix:
+def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'BoW') -> lil_matrix:
     """
     Convert a corpus to a sparse matrix.
     :param corpus: The corpus which contains FeaturedSample objects.
