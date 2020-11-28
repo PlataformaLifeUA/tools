@@ -6,8 +6,9 @@ from typing import List, Dict
 from gensim import models
 from tqdm import tqdm
 
-from corpus import download, load_life_corpus, save_corpus, corpus2matrix, divide_corpus, corpus2bow, features2matrix, \
-    expand_wordembedding
+from corpus import download_life, load_life_corpus, save_corpus, corpus2matrix, divide_corpus, corpus2bow, \
+    features2matrix, \
+    expand_wordembedding, download
 from eval import evaluate, metrics, print_metrics
 from preproc import preprocess_corpus, preprocess
 from gensim.corpora import Dictionary
@@ -18,6 +19,7 @@ from utils import translate
 from wemb import WordEmbeddings
 
 log = logging.getLogger(__name__)
+REDDIT_CORPUS = 'https://raw.githubusercontent.com/PlataformaLifeUA/corpus/master/reddit/reddit_messages.csv'
 
 
 def increase_measures(total_measures: dict, measures: dict):
@@ -75,7 +77,7 @@ def main():
     if not exists('data/'):
         mkdir('data')
     if not exists('data/life_corpus.csv'):
-        corpus = download()
+        corpus = download_life()
         save_corpus(corpus, 'data/life_corpus.csv')
     if not exists('data/life_corpus_en.csv'):
         corpus = load_life_corpus('data/life_corpus.csv')
@@ -88,7 +90,9 @@ def main():
 
     measures = cross_validation(corpus, 10, embedings)
     print_metrics(measures)
-    texts = load_reddit_corpus('data/datos_reddit_top.csv')
+    if not exists('data/reddit_messages.csv'):
+        download(REDDIT_CORPUS, 'data/reedit_messages.csv')
+    texts = load_reddit_corpus('data/reedit_messages.csv')
     results = []
     finish = False
     it = 1

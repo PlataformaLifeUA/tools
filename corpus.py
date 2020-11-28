@@ -88,7 +88,7 @@ def get_doc_text(doc) -> str:
     return ''.join(doc.xpath('//TextWithNodes/text()'))
 
 
-def download() -> Dict[str, List[str]]:
+def download_life() -> Dict[str, List[str]]:
     corpus = {
         'Language': [],
         'Text': [],
@@ -113,6 +113,12 @@ def download() -> Dict[str, List[str]]:
             corpus['Message types'].append(msg_types)
 
     return corpus
+
+
+def download(url: str, fname: str) -> None:
+    page = requests.get(url)
+    with open(fname, 'wt') as file:
+        file.write(page.content.decode('utf-8'))
 
 
 def save_corpus(corpus, fname: str, encoding: str = 'utf-8') -> None:
