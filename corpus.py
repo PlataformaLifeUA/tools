@@ -67,13 +67,13 @@ def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str =
     """
     bow_corpus = corpus2bow(corpus, dictionary, embedings, lang, fixed)
     if method == 'BoW':
-        return features2matrix(bow_corpus, dictionary)
+        return features2matrix(bow_corpus, dictionary), bow_corpus, None
     tfidf_corpus = bow2tfidf(bow_corpus)
     if method == 'TF/IDF':
-        return features2matrix(tfidf_corpus, dictionary)
+        return features2matrix(tfidf_corpus, dictionary), bow_corpus, tfidf_corpus
     # lsi_corpus = ...
     # lda_corpus = ...
-    return features2matrix(bow_corpus, dictionary)
+    return features2matrix(bow_corpus, dictionary), bow_corpus, None
 
 
 def get_feature_text(doc, feature_name: str) -> str:
