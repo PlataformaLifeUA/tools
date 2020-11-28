@@ -11,14 +11,34 @@ from tqdm import tqdm
 from lxml import html, etree
 
 from preproc import preprocess_corpus
+from wemb import WordEmbeddings
 
 URL = 'https://github.com/PlataformaLifeUA/corpus'
 
 
-def corpus2bow(corpus: List[List[str]], dictionary: Dictionary) -> List[List[Tuple[int, int]]]:
+def expand_wordembedding(sample: List[Tuple[int, int]], dictionary: Dictionary, embedings: WordEmbeddings = None,
+                         lang: str = 'en', fixed: bool = False) -> List[Tuple[int, float]]:
+    if not embedings:
+        return sample
+    sample_dict = {}
+    for id, freq in sample:
+        sample_dict[id] = freq
+        term = dictionary[id]
+        synonyms = embedings.synonyms(term, lang)
+        if not fixed:
+            dictionary.add_documents([[t[0] for t in synonyms]])
+        for synonym, w in synonyms:
+            if synonym in dictionary.token2id:
+                synonym_id = dictionary.token2id[synonym]
+                sample_dict[synonym_id] = sample_dict[synonym_id] + w * freq if synonym_id in sample_dict else w * freq
+
+    return [(term, freq) for term, freq in sample_dict.items()]
+
+def corpus2bow(corpus: List[List[str]], dictionary: Dictionary, embedings: WordEmbeddings = None,
+               lang: str = 'en', fixed: bool = False) -> List[List[Tuple[int, float]]]:
     bow_corpus = []
     for sample in tqdm(corpus, desc='Obtaining the corpus BoW'):
-        bow_corpus.append(dictionary.doc2bow(sample))
+        bow_corpus.append(expand_wordembedding(dictionary.doc2bow(sample), dictionary, embedings, lang, fixed))
     return bow_corpus
 
 
@@ -38,13 +58,14 @@ def bow2tfidf(bow_corpus):
     return tfidf_corpus
 
 
-def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'BoW') -> lil_matrix:
+def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'TF/IDF',
+                  embedings: WordEmbeddings = None, lang: str = 'en', fixed: bool = False) -> lil_matrix:
     """
     Convert a corpus to a sparse matrix.
     :param corpus: The corpus which contains FeaturedSample objects.
     :return: A sparse matrix which each row represents a sample and each column the each feature of that sample.
     """
-    bow_corpus = corpus2bow(corpus, dictionary)
+    bow_corpus = corpus2bow(corpus, dictionary, embedings, lang, fixed)
     if method == 'BoW':
         return features2matrix(bow_corpus, dictionary)
     tfidf_corpus = bow2tfidf(bow_corpus)
