@@ -70,7 +70,7 @@ class WordEmbeddings(object):
         embeddings = self.embeddings[lang].normalize_words()
         cache = self.caches[lang]
         if term in cache:
-            return cache[lang]
+            return cache[term]
         synonyms = []
         if len(term) > 1 and term.lower() not in self.stopwords and term in embeddings:
             neighbors = embeddings.nearest_neighbors(term, self.neighbors)
