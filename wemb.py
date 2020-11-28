@@ -56,6 +56,7 @@ class WordEmbeddings(object):
         self.embeddings = self.download_embeddings(languages, folder)
         self.stopwords = self.download_stopwords(languages, folder)
         self.neighbors = neighbors
+        self.caches = {lang: {} for lang in self.embeddings}
 
     def synonyms(self, term: str, lang: str = 'en') -> List[str]:
         """
@@ -67,12 +68,16 @@ class WordEmbeddings(object):
         if lang not in self.embeddings:
             raise InvalidLanguage(f'The language code "{lang}" is not supported in the current version.')
         embeddings = self.embeddings[lang].normalize_words()
+        cache = self.caches[lang]
+        if term in cache:
+            return cache[lang]
         synonyms = []
         if len(term) > 1 and term.lower() not in self.stopwords and term in embeddings:
             neighbors = embeddings.nearest_neighbors(term, self.neighbors)
             synonyms = list(zip(neighbors, embeddings.distances(term, neighbors)))
+        cache[term] = [t for t in synonyms if t[1] > 0.95]
 
-        return [t for t in synonyms if t[1] > 0.95]
+        return cache[term]
 
     @staticmethod
     def suggestions(synonyms: Dict[str, List[str]], top: int = 5):
