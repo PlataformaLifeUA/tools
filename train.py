@@ -134,7 +134,7 @@ def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str], conf
         X = features2matrix([tfidf_sample], dictionary)
         y = ml.predict_proba(X[0])
         if y[0][0] <= confidence or y[0][1] <= confidence:
-            detected.append((i, y[0][1], y[0][1]))
+            detected.append((i, y[0][0], y[0][1]))
     return detected
 
 
