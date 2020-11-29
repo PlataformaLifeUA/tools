@@ -1,7 +1,7 @@
 import csv
 from os import mkdir
 from os.path import exists
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 from gensim import models
 from tqdm import tqdm
@@ -95,7 +95,7 @@ def main():
     texts = load_reddit_corpus('data/reddit_messages.csv')
     results = []
     it = 1
-    detected = detect_suicide_messages(corpus, texts, 0.2 ** it, embedings)
+    detected = detect_suicide_messages(corpus, texts, 0.1 ** it, 0.2 ** it, embedings)
     while detected:
         for i, no_risk_confidence, risk_confidence in reversed(detected):
             text = texts[i]
@@ -109,7 +109,7 @@ def main():
             corpus['Message types'].append('Undefined')
             results.append((it, no_risk_confidence, risk_confidence, text))
 
-        detected = detect_suicide_messages(corpus, texts, 0.2 ** it, embedings)
+        detected = detect_suicide_messages(corpus, texts, 0.1 ** it, 0.2 ** it, embedings)
         it += 1
 
     with open('data/result.csv', 'w', newline='') as file:
@@ -119,8 +119,8 @@ def main():
             writer.writerow(result)
 
 
-def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str], confidence: float,
-                            embedings: WordEmbeddings, lang: str = 'en') -> List[int]:
+def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str], nr_confidence: float, r_confidence: float,
+                            embedings: WordEmbeddings, lang: str = 'en') -> List[Tuple[int, float, float]]:
     train_corpus, _, y_train, _ = divide_corpus(corpus, 1)
     dictionary = Dictionary(train_corpus)
     X_train, bow_corpus, tfidf_corpus = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
@@ -133,7 +133,7 @@ def detect_suicide_messages(corpus: Dict[str, List[str]], texts: List[str], conf
         tfidf_sample = tfidf[bow_sample]
         X = features2matrix([tfidf_sample], dictionary)
         y = ml.predict_proba(X[0])
-        if y[0][0] <= confidence or y[0][1] <= confidence:
+        if y[0][0] <= r_confidence or y[0][1] <= nr_confidence:
             detected.append((i, y[0][0], y[0][1]))
     return detected
 
