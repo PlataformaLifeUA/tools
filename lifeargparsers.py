@@ -50,22 +50,24 @@ class LifeArgParser(object):
         parser = ArgumentParser(description='Train, evaluate and increase the corpus using boostraping techniques')
         parser.add_argument('-l', '--lang', metavar='LANG', type=str, default='en', help='The corpus language.')
         parser.add_argument('-d', '--data', metavar='DIR', type=str, default='data',
-                            help='The folder where the data is stored.')
+                            help='The folder where the data is stored. By default "data".')
         parser.add_argument('-en', '--embeddings', metavar='NUM', type=int, default=1000,
-                            help='The maximum number of embeddings neighbors to retrieve for each term.')
+                            help='The maximum number of embeddings neighbors to retrieve for each term. '
+                                 'By default 1000.')
         parser.add_argument('-et', '--emb_threshold', metavar='VALUE', type=float, default=0.95,
                             help='The threshold to include embedding neighbors.')
         parser.add_argument('-e', '--evaluate', default=False, action='store_true',
-                            help='The threshold to include embedding neighbors.')
+                            help='If it is evaluate or not. By default no.')
         parser.add_argument('-ef', '--eval_file', metavar='FILE', type=str,
                             help='The output file to store the evaluation result.')
         parser.add_argument('-b', '--boostrapping', default=True, action='store_false',
-                            help='The threshold to include embedding neighbors.')
-        parser.add_argument('-c', '--cross', metavar='NUM', type=int, default=10, help='The cross validation folder.')
+                            help='The include boostrapping process or not. By default yes.')
+        parser.add_argument('-c', '--cross', metavar='NUM', type=int, default=10,
+                            help='The cross validation folder. By default 10.')
         parser.add_argument('-n', '--no_risk', metavar='VALUE', type=float, default=0.2,
-                            help='The confidence of no risk samples in the boostrapping.')
+                            help='The confidence of no risk samples in the boostrapping. By default 0.2.')
         parser.add_argument('-r', '--risk', metavar='VALUE', type=float, default=0.2,
-                            help='The confidence of risk samples in the boostrapping.')
+                            help='The confidence of risk samples in the boostrapping. By default 0.2')
         parser.add_argument('-f', '--file', metavar='FILE', type=str, required=True,
                             help='The output file to store the boostrapped corpus.')
         self.__args = parser.parse_args()
