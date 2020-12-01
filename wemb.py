@@ -47,7 +47,7 @@ class WordEmbeddings(object):
     """
     Class to get synonyms from word previosly generated embeddings.
     """
-    def __init__(self, languages: Union[str, List[str]], folder: str, neighbors: int = 10):
+    def __init__(self, languages: Union[str, List[str]], folder: str, neighbors: int = 1000, threshold: float = 0.95):
         """
         Constructor.
         :param languages: The languages to support.
@@ -56,6 +56,7 @@ class WordEmbeddings(object):
         self.embeddings = self.download_embeddings(languages, folder)
         self.stopwords = self.download_stopwords(languages, folder)
         self.neighbors = neighbors
+        self.threshold = threshold
         self.caches = {lang: {} for lang in self.embeddings}
 
     def synonyms(self, term: str, lang: str = 'en') -> List[str]:
@@ -75,7 +76,7 @@ class WordEmbeddings(object):
         if len(term) > 1 and term.lower() not in self.stopwords and term in embeddings:
             neighbors = embeddings.nearest_neighbors(term, self.neighbors)
             synonyms = list(zip(neighbors, embeddings.distances(term, neighbors)))
-        cache[term] = [t for t in synonyms if t[1] > 0.95]
+        cache[term] = [t for t in synonyms if t[1] > self.threshold]
 
         return cache[term]
 

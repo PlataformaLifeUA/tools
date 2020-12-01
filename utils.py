@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 from googletrans import Translator
+from pandas import DataFrame
 from tqdm import tqdm
 
 
@@ -21,3 +22,13 @@ def format_value(value: float) -> str:
     :return: The formated value.
     """
     return '{0:.2f}%'.format(value * 100)
+
+
+def save(fname: str, content: Union[str, bytes], encoding: str = 'utf-8'):
+    with open(fname, 'wt', encoding=encoding) if isinstance(content, str) else open(fname, 'wb') as file:
+        file.write(content)
+
+
+def save_csv(corpus, fname: str, encoding: str = 'utf-8') -> None:
+    df = DataFrame(corpus)
+    df.to_csv(fname, encoding=encoding, index=False)
