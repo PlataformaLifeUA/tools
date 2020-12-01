@@ -39,10 +39,10 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10, embedings: WordEmbe
     for i in range(folders):
         train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
         dictionary = Dictionary(train_corpus)
-        X_train, _ = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
+        X_train, _, _ = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
         ml = create_ml(X_train, y_train)
 
-        X_test, _ = corpus2matrix(test_corpus, dictionary, 'TF/IDF', embedings, lang, True)
+        X_test, _, _ = corpus2matrix(test_corpus, dictionary, 'TF/IDF', embedings, lang, True)
 
         y_pred = evaluate(X_test, ml)
         measures = metrics(y_test, y_pred)

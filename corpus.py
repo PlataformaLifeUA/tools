@@ -1,7 +1,7 @@
 import csv
 from abc import ABC, ABCMeta, abstractmethod
 from random import randint
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Union
 
 from gensim.corpora import Dictionary
 from gensim import models
@@ -191,7 +191,8 @@ def bow2tfidf(bow_corpus):
 
 
 def corpus2matrix(corpus: List[List[str]], dictionary: Dictionary, method: str = 'TF/IDF',
-                  embedings: WordEmbeddings = None, lang: str = 'en', fixed: bool = False) -> lil_matrix:
+                  embedings: WordEmbeddings = None, lang: str = 'en', fixed: bool = False) \
+        -> Tuple[lil_matrix, List[List[Tuple[int, float]]], Union[ List[List[Tuple[int, float]]], None]]:
     """
     Convert a corpus to a sparse matrix.
     :param corpus: The corpus which contains FeaturedSample objects.
