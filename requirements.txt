@@ -18,3 +18,4 @@ polyglot==16.7.4
 PyICU==2.6
 pycld2==0.41
 Morfessor==2.0.6
+odfpy==1.4.1

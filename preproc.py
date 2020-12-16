@@ -96,9 +96,9 @@ def remove_number(text):
     return output
 
 
-def removing_stop_words_tokenize(text):
+def removing_stop_words_tokenize(text) -> List[str]:
     """
-    Removing stop words Tokenización
+    Removing stop words Tokenization.
     """
     word_tokens = word_tokenize(text)
     filtered_sentence = [w for w in word_tokens if not w in stop_words]
@@ -109,7 +109,7 @@ def removing_stop_words_tokenize(text):
     return filtered_sentence
 
 
-def stemmer(text):
+def stemmer(text) -> List[str]:
     """
     Stemize verbs in list of tokenized words
     """
@@ -121,7 +121,7 @@ def stemmer(text):
     return lemmas
 
 
-def preprocess(text: str) -> str:
+def preprocess(text: str) -> List[str]:
     # Eliminar etiquetas HTML
     text = strip_html_tags(text.lower()).strip()
     # Eliminar acentos
@@ -135,11 +135,11 @@ def preprocess(text: str) -> str:
     # Eliminar numeros
     text = remove_number(text)
     # Eliminar stop_words y tokenizar
-    text = removing_stop_words_tokenize(text)
+    tokens = removing_stop_words_tokenize(text)
     # Lematización
-    text = stemmer(text)
+    tokens = stemmer(text)
 
-    return text
+    return tokens
 
 
 def load_corpus(fname: str, encoding: str = 'utf-8') -> List[str]:

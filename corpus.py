@@ -166,6 +166,7 @@ def expand_wordembedding(sample: List[Tuple[int, int]], dictionary: Dictionary, 
 
     return [(term, freq) for term, freq in sample_dict.items()]
 
+
 def corpus2bow(corpus: List[List[str]], dictionary: Dictionary, embedings: WordEmbeddings = None,
                lang: str = 'en', fixed: bool = False) -> List[List[Tuple[int, float]]]:
     bow_corpus = []
