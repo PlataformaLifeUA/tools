@@ -19,3 +19,5 @@ PyICU==2.6
 pycld2==0.41
 Morfessor==2.0.6
 odfpy==1.4.1
+xlrd==2.0.1
+openpyxl==3.0.5

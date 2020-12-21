@@ -1,18 +1,27 @@
+import pickle as pk
+from logging import getLogger
 from argparse import ArgumentParser
 from enum import Enum
-from typing import Tuple, Dict, List, Any, Union
-
+from os.path import exists
+from typing import Tuple, Dict, List, Any
+from strsimpy.weighted_levenshtein import WeightedLevenshtein
 from pandas import read_excel, read_csv
+from tqdm import tqdm
 
 AGREEMENT = 'agreement'
 MAX = 'max'
 ANY = 'any'
 EVAL_TYPES = [AGREEMENT, MAX, ANY]
+DEF_BUFFER = '.buffer'
+logger = getLogger(__name__)
 
 
 class Classes(Enum):
     NO_RISK = 0
     RISK = 1
+
+    def __int__(self) -> int:
+        return self.value
 
 
 class EvalType(Enum):
@@ -60,12 +69,16 @@ class ArgParser(object):
 
 
 class Evaluators(object):
-    def __init__(self, fname: str, type: EvalType = EvalType.AGREEMENT):
-        self.type = type
+    def __init__(self, fname: str, eval_type: EvalType = EvalType.AGREEMENT, lev_dist: float = 0.1,
+                 buffer: bool = True):
+        self.type = eval_type
         self.evaluations = {}
         self.texts = {}
         self.iterations = []
-        df = read_excel(fname)
+        self._lev = WeightedLevenshtein()
+        self._lev_dist = lev_dist
+        self.__buffer = self.__load_buffer() if buffer else {}
+        df = read_excel(fname, engine='openpyxl')
         for row in range(len(df)):
             eval_id, it, conf, text = df['Evaluator'][row], df['Iteration'][row], df['Confidence'][row], df['Text'][row]
             cl = Classes.RISK if df['Classification'][row] == 'Risk' else Classes.NO_RISK
@@ -81,20 +94,33 @@ class Evaluators(object):
 
     def evaluate(self, results: Dict[str, Tuple[int, float, float]]) -> Dict[Any, List[List[int]]]:
         measures = {'total': [[0, 0], [0, 0]]}
-        for text, (step, no_risk, risk) in results.items():
+        for text, (step, no_risk, risk) in tqdm(results.items(), desc='Evaluating boostrapping'):
             if text in self:
                 cl = Classes.NO_RISK.value if no_risk > risk else Classes.RISK.value
                 if step not in measures:
                     measures[step] = [[0, 0], [0, 0]]
                 eval_classes = self[text]
                 for eval_cl in eval_classes:
-                    measures[step][cl][eval_cl] += 1
-                    measures['total'][cl][eval_cl] += 1
+                    measures[step][cl][int(eval_cl)] += 1
+                    measures['total'][cl][int(eval_cl)] += 1
 
         return measures
 
-    def __getitem__(self, item) -> List[int]:
-        evaluations = self.texts[item]
+    def __getitem__(self, item: str) -> List[int]:
+        dist = len(item) * self._lev_dist
+        if item in self.__buffer:
+            evaluations = self.__buffer[item]
+        else:
+            evaluations = [self.texts[text] for text in self.texts if self._lev.distance(item, text) < dist]
+            if len(evaluations) == 0:
+                logger.warning(f'The following text:\n\n{item}\n\nDoes not have any valid answer.')
+            elif len(evaluations) > 1:
+                raise ValueError(f'The text:\n\n{item}\n\nHas more than one match.')
+            else:
+                evaluations = evaluations[0]
+            self.__buffer[item] = evaluations
+            self.__save_buffer(self.__buffer)
+        # evaluations = self.texts[item]
         if self.type == EvalType.AGREEMENT:
             return self.__agreement(evaluations)
         if self.type == EvalType.MAX:
@@ -111,8 +137,8 @@ class Evaluators(object):
     @staticmethod
     def __any(evaluations: List[Tuple[str, float, int]]) -> List[int]:
         result = []
-        for eval in evaluations:
-            _, _, cl = eval
+        for evaluation in evaluations:
+            _, _, cl = evaluation
             if cl not in result:
                 result.append(cl)
         return result
@@ -126,14 +152,26 @@ class Evaluators(object):
     @staticmethod
     def __agreement(evaluations):
         result = []
-        for eval in evaluations:
-            _, _, cl = eval
+        for evaluation in evaluations:
+            _, _, _, cl = evaluation
             if result:
                 if cl not in result:
                     return []
             else:
                 result.append(cl)
         return result
+
+    @staticmethod
+    def __load_buffer(fname: str = DEF_BUFFER) -> Dict[str, Tuple]:
+        if not exists(fname):
+            return {}
+        with open(fname, 'rb') as file:
+            return pk.load(file)
+
+    @staticmethod
+    def __save_buffer(buffer: Dict[str, Tuple], fname: str = DEF_BUFFER):
+        with open(fname, 'wb') as file:
+            return pk.dump(buffer, file)
 
 
 def read_results(fname: str, encoding: str = 'utf-8') -> Dict[str, Tuple[int, float, float]]:
@@ -146,9 +184,9 @@ def read_results(fname: str, encoding: str = 'utf-8') -> Dict[str, Tuple[int, fl
 
 
 def main(args: ArgParser):
-    eval = Evaluators(args.evaluations)
+    evaluator = Evaluators(args.evaluations)
     results = read_results(args.results)
-    measures = eval.evaluate(results)
+    measures = evaluator.evaluate(results)
     print(measures)
 
 
