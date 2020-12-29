@@ -134,3 +134,4 @@ dmypy.json
 # Life project
 data/
 models/
+/.buffer
