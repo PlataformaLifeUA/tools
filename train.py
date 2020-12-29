@@ -3,6 +3,7 @@ from os import mkdir, path
 from typing import List, Dict, Tuple
 
 from gensim import models
+from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 from corpus import corpus2matrix, divide_corpus, features2matrix, expand_wordembedding, LifeCorpus, RedditCorpus
@@ -34,13 +35,13 @@ def div_measures(total_measures: dict, divisor: int) -> dict:
 
 
 def cross_validation(corpus:  LifeCorpus, folders: int = 10, embedings: WordEmbeddings = None,
-                     lang: str = 'en'):
+                     lang: str = 'en', cl: str = 'SVM'):
     sum_measures = {}
     for i in range(folders):
         train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
         dictionary = Dictionary(train_corpus)
         X_train, _, _ = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
-        ml = create_ml(X_train, y_train)
+        ml = create_ml(X_train, y_train, cl)
 
         X_test, _, _ = corpus2matrix(test_corpus, dictionary, 'TF/IDF', embedings, lang, True)
 
@@ -51,8 +52,11 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10, embedings: WordEmbe
     return div_measures(sum_measures, folders)
 
 
-def create_ml(X_train, y_train):
-    ml = SVC(probability=True)
+def create_ml(X_train, y_train, cl: str = 'SVM'):
+    if cl.lower() == 'kmeans':
+        ml = KMeans(2)
+    else:
+        ml = SVC(probability=True)
     ml.fit(X_train, y_train)
     return ml
 
@@ -63,12 +67,12 @@ def main():
     
     embeddings = WordEmbeddings(args.lang, args.data, args.embeddings, args.embedding_threshold)
     if args.evaluate:
-        measures = cross_validation(corpus, args.cross_folder, embeddings)
+        measures = cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml)
         print_metrics(measures)
     reddit_corpus = RedditCorpus(args.data)
     results = []
     it = 1
-    detected = detect_suicide_messages(corpus, reddit_corpus, args.no_risk ** it, args.risk ** it, embeddings)
+    detected = detect_suicide_messages(corpus, reddit_corpus, args.no_risk ** it, args.risk ** it, embeddings, args.lang, args.ml)
     while detected:
         for i, no_risk_confidence, risk_confidence in reversed(detected):
             text = reddit_corpus[i]
@@ -82,7 +86,7 @@ def main():
             corpus['Message types'].append('Undefined')
             results.append((it, no_risk_confidence, risk_confidence, text))
 
-        detected = detect_suicide_messages(corpus, reddit_corpus, 0.1 ** it, 0.2 ** it, embeddings)
+        detected = detect_suicide_messages(corpus, reddit_corpus, args.no_risk ** it, args.risk ** it, embeddings, args.lang, args.ml)
         it += 1
 
     with open(args.file, 'w', newline='') as file:
@@ -93,11 +97,12 @@ def main():
 
 
 def detect_suicide_messages(corpus: LifeCorpus, texts: RedditCorpus, nr_confidence: float, r_confidence: float,
-                            embedings: WordEmbeddings, lang: str = 'en') -> List[Tuple[int, float, float]]:
+                            embedings: WordEmbeddings, lang: str = 'en',
+                            cl: str = 'SVM') -> List[Tuple[int, float, float]]:
     train_corpus, _, y_train, _ = divide_corpus(corpus, 1)
     dictionary = Dictionary(train_corpus)
     X_train, bow_corpus, tfidf_corpus = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
-    ml = create_ml(X_train, y_train)
+    ml = create_ml(X_train, y_train, cl)
     tfidf = models.TfidfModel(bow_corpus)
     detected = []
     for i, text in tqdm(enumerate(texts), desc='Classifying Reddit corpus', total=len(texts)):

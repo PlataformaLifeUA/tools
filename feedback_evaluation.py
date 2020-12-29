@@ -69,7 +69,7 @@ class ArgParser(object):
 
 
 class Evaluators(object):
-    def __init__(self, fname: str, eval_type: EvalType = EvalType.AGREEMENT, lev_dist: float = 0.1,
+    def __init__(self, fname: str, eval_type: EvalType = EvalType.AGREEMENT, lev_dist: float = 0.05,
                  buffer: bool = True):
         self.type = eval_type
         self.evaluations = {}
