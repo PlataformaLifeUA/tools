@@ -107,7 +107,7 @@ class LifeCorpus(AnnotatedCorpus):
         texts = self.__corpus['Text']
         for i in tqdm(range(len(texts)), desc='Translating the corpus.'):
             src = languages[i].lower()
-            if src != dest.lower():
+            if src != dest.lower() and texts[i]:
                 texts[i] = translator.translate(texts[i], dest=dest, src=src).text
                 languages[i] = dest
 
