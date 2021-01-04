@@ -7,13 +7,13 @@ from tqdm import tqdm
 from utils import save, save_csv
 
 GOLD_STANDARD_URL = 'https://github.com/PlataformaLifeUA/corpus'
-REDDIT_CORPUS = 'https://raw.githubusercontent.com/PlataformaLifeUA/corpus/master/reddit/reddit_messages.csv'
+REDDIT_CORPUS_URL = 'https://raw.githubusercontent.com/PlataformaLifeUA/corpus/master/reddit/reddit_messages.csv'
 
 
 def download(url: str, fname: str = None, encoding: str = 'utf-8') -> Union[str, bytes]:
     page = requests.get(url)
     if fname:
-        save(page.content.decode(encoding) if encoding else page.content, encoding)
+        save(fname, page.content.decode(encoding) if encoding else page.content, encoding)
 
     return page.content.decode(encoding) if encoding else page.content
 
@@ -59,4 +59,4 @@ class Downloader(object):
 
     @staticmethod
     def download_reddit_corpus(fname: str):
-        download(REDDIT_CORPUS, fname)
+        download(REDDIT_CORPUS_URL, fname)

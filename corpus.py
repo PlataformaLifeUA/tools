@@ -128,9 +128,9 @@ class RedditCorpus(Corpus):
 
     def __init__(self, folder: str = 'data'):
         super().__init__(folder)
-        if not path.exists('data/reddit_messages.csv'):
+        if not path.exists(path.join(self.folder, REDDIT_CORPUS)):
             self.download()
-        self.texts = self.load('data/reddit_messages.csv')
+        self.texts = self.load(path.join(self.folder, REDDIT_CORPUS))
 
     def download(self):
         Downloader.download_reddit_corpus(path.join(self.folder, REDDIT_CORPUS))
