@@ -30,17 +30,18 @@ class Downloader(object):
 
         doc = html.fromstring(requests.get(GOLD_STANDARD_URL).content)
         for url in tqdm(doc.xpath('//div[@role="row"]/div[2]//a/@href'), desc='Downloading Life corpus'):
-            url = 'https://raw.githubusercontent.com' + url.replace('blob/', '')
-            doc = etree.fromstring(requests.get(url).content)
-            text = Downloader.__get_doc_text(doc)
-            language = Downloader.__get_feature_text(doc, 'Language')
-            alert_level = Downloader.__get_feature_text(doc, 'AlertLevel')
-            msg_types = ', '.join([Downloader.__get_feature_text(doc, 'PrimaryMessageType'),
-                                   Downloader.__get_feature_text(doc, 'SecondaryMessageType')])
-            corpus['Language'].append(language)
-            corpus['Text'].append(text)
-            corpus['Alert level'].append(alert_level)
-            corpus['Message types'].append(msg_types)
+            if url.endswith('.xml'):
+                url = 'https://raw.githubusercontent.com' + url.replace('blob/', '')
+                doc = etree.fromstring(requests.get(url).content)
+                text = Downloader.__get_doc_text(doc)
+                language = Downloader.__get_feature_text(doc, 'Language')
+                alert_level = Downloader.__get_feature_text(doc, 'AlertLevel')
+                msg_types = ', '.join([Downloader.__get_feature_text(doc, 'PrimaryMessageType'),
+                                       Downloader.__get_feature_text(doc, 'SecondaryMessageType')])
+                corpus['Language'].append(language)
+                corpus['Text'].append(text)
+                corpus['Alert level'].append(alert_level)
+                corpus['Message types'].append(msg_types)
 
             save_csv(corpus, fname)
 
@@ -57,5 +58,8 @@ class Downloader(object):
         return ''.join(doc.xpath('//TextWithNodes/text()'))
 
     @staticmethod
-    def download_reddit_corpus(cls, fname: str):
+    def download_reddit_corpus(fname: str):
         download(REDDIT_CORPUS, fname)
+
+
+Downloader.download_gold_standard('test')
