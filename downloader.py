@@ -60,6 +60,3 @@ class Downloader(object):
     @staticmethod
     def download_reddit_corpus(fname: str):
         download(REDDIT_CORPUS, fname)
-
-
-Downloader.download_gold_standard('test')
