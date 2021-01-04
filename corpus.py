@@ -68,7 +68,7 @@ class LifeCorpus(AnnotatedCorpus):
         self.__gold_file = path.join(self.folder, GOLD_STANDARD_CORPUS)
         if not path.exists(self.__gold_file):
             self.download()
-        if not path.exists(self.__gold_file):
+        if not path.exists(self.fname):
             self.__corpus = self.__load(self.__gold_file)
             self.translate('en')
             self.save()
