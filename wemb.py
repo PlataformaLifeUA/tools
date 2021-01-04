@@ -123,7 +123,7 @@ class WordEmbeddings(object):
             file = sep.join([folder, 'embeddings2', lang, EMBEDDINGS_FILE])
             if not exists(file):
                 log.info(f'Downloading the word embeddings for {lang_name[lang].title()} language...')
-                downloader.download_life(f'embeddings2.{lang}', folder)
+                downloader.download(f'embeddings2.{lang}', folder)
                 log.info(f'Model downloaded successfully.')
             log.info(f'Loading the word embeddings for {lang_name[lang].title()} language.')
             embeddings[lang] = Embedding.load(file)
