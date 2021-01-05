@@ -1,9 +1,8 @@
 from sys import stdout
 from typing import List, Dict, TextIO
-
 from scipy.sparse import lil_matrix
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, \
-    jaccard_score
+    jaccard_score, confusion_matrix
 
 from utils import format_value
 
@@ -103,3 +102,33 @@ def _print_metric_if_show(msg: str, metrics: Dict[str, float], metric: str, show
     """
     if metric in show:
         print(f'{msg}: ', format_value(metrics[metric]), end='\t', file=file)
+
+
+def medidas(y_true, y_pred):
+    conf = confusion_matrix(y_true, y_pred)
+    print("Matriz de confusión")
+    print(conf)
+
+    # Accuracy
+    from sklearn.metrics import accuracy_score
+    accu = accuracy_score(y_true, y_pred)
+    print("Accuracy")
+    print(accu)
+
+    # Recall
+    from sklearn.metrics import recall_score
+    reca = recall_score(y_true, y_pred, average=None)
+    print("Recall")
+    print(reca)
+
+    # Precision
+    from sklearn.metrics import precision_score
+    prec = precision_score(y_true, y_pred, average=None)
+    print("Precision")
+    print(prec)
+
+    # F1score
+    from sklearn.metrics import f1_score
+    scor = f1_score(y_true, y_pred, average=None)
+    print("F1score")
+    print(scor)
