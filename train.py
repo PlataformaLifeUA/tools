@@ -1,4 +1,6 @@
 import csv
+import json
+import sys
 from os import mkdir, path
 from typing import List, Dict, Tuple
 
@@ -67,8 +69,12 @@ def main():
     
     embeddings = WordEmbeddings(args.lang, args.data, args.embeddings, args.embedding_threshold)
     if args.evaluate:
-        measures = cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml)
-        print_metrics(measures)
+        measures = []
+        for i in range(30):
+            measures.append(cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml))
+            print_metrics(measures[-1])
+        json.dump(measures, 'results/tfidf-emb-10-threshold-0.8.json')
+    sys.exit()
     reddit_corpus = RedditCorpus(args.data)
     results = []
     it = 1

@@ -1,3 +1,4 @@
+import json
 from random import randint
 from typing import List, Any, Dict
 
@@ -55,8 +56,11 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10):
 
 def main() -> None:
     corpus = LifeCorpus()
-    measures = cross_validation(corpus)
-    print_metrics(measures)
+    measures = []
+    for i in range(30):
+        measures.append(cross_validation(corpus))
+        print_metrics(measures[-1])
+    json.dump('results/rasa_evaluation.json')
 
 
 if __name__ == '__main__':
