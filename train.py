@@ -73,7 +73,8 @@ def main():
         for i in range(30):
             measures.append(cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml))
             print_metrics(measures[-1])
-        json.dump(measures, 'results/tfidf-emb-10-threshold-0.8.json')
+        with open('results/tfidf-emb-10-threshold-0.8.json', 'wt') as file:
+            json.dump(measures, file)
     sys.exit()
     reddit_corpus = RedditCorpus(args.data)
     results = []

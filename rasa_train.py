@@ -60,7 +60,8 @@ def main() -> None:
     for i in range(30):
         measures.append(cross_validation(corpus))
         print_metrics(measures[-1])
-    json.dump('results/rasa_evaluation.json')
+    with open('results/rasa_evaluation.json', 'wt') as file:
+        json.dump(measures, file)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from sys import stdout
-from typing import List, Dict, Any, Tuple
+from shutil import rmtree
+from typing import List, Tuple
 import os
 
 from rasa.model import unpack_model
@@ -65,7 +65,8 @@ class RasaWrapper(object):
     def extract_samples(corpus: List[str], y_train: List[str], cls: str) -> List[str]:
         return [corpus[i] for i in range(0, len(corpus)) if y_train[i] == cls]
 
-    def generate_nlu(self, no_risk_examples: List[str], risk_examples: List[str]) -> dict:
+    @staticmethod
+    def generate_nlu(no_risk_examples: List[str], risk_examples: List[str]) -> dict:
         nlu =OrderedDict()
         nlu['version'] = '2.0'
         no_risk_nlu = OrderedDict()
@@ -77,7 +78,8 @@ class RasaWrapper(object):
         nlu['nlu'] = [no_risk_nlu, risk_nlu]
         return nlu
 
-    def save_nlu(self, nlu: dict, nlu_file: str):
+    @staticmethod
+    def save_nlu(nlu: dict, nlu_file: str):
         yml = YAML()
         yml.indent(mapping=4, sequence=4, offset=4)
         with open(nlu_file, 'wt') as file:
@@ -89,7 +91,8 @@ class RasaWrapper(object):
                 print(f'  examples: | ', file=file)
                 yml.dump(intent['examples'], file)
 
-    def evaluate(self, corpus: List[str]) -> List[Tuple[str, float]]:
+    @staticmethod
+    def evaluate(corpus: List[str]) -> List[Tuple[str, float]]:
         folder = unpack_model(MODEL_FILE)
         interpreter = Interpreter.load(os.path.join(folder, 'nlu'))
         # return [interpreter.parse(sample)[1] for sample in corpus]
@@ -100,4 +103,5 @@ class RasaWrapper(object):
             # intents = sorted(intents, key=lambda x: -x['confidence'])
             # intent, confidence = intents[0]['intent'], intents[0]['confidence']
             y_pred.append((intent['name'], intent['confidence']))
+        rmtree(folder)
         return y_pred

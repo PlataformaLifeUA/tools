@@ -88,8 +88,8 @@ class LifeCorpus(AnnotatedCorpus):
             'Alert level': [],
             'Message types': []
         }
-        with open(fname, "r", encoding=encoding) as File:
-            reader = csv.DictReader(File)
+        with open(fname, "r", encoding=encoding) as file:
+            reader = csv.DictReader(file)
             for row in tqdm(reader, desc='Loading the corpus'):
                 corpus['Language'].append(row['Language'])
                 corpus['Text'].append(row['Text'])
