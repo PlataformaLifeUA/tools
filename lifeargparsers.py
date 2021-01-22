@@ -52,6 +52,10 @@ class LifeArgParser(object):
     def ml(self) -> str:
         return self.__args.ml
 
+    @property
+    def output(self) -> str:
+        return self.__args.output
+
     def __init__(self):
         parser = ArgumentParser(description='Train, evaluate and increase the corpus using boostraping techniques')
         parser.add_argument('-l', '--lang', metavar='LANG', type=str, default='en', help='The corpus language.')
@@ -78,4 +82,6 @@ class LifeArgParser(object):
                             help='The output file to store the boostrapped corpus.')
         parser.add_argument('-m', '--ml', metavar='NAME', type=str, choices=CLASSIFIERS, default='SVM',
                             help=f'The classifier name. Available values: {CLASSIFIERS}.')
+        parser.add_argument('-o', '--output', metavar='FILE', type=str, required=True,
+                            help=f'The file to store the results in json format.')
         self.__args = parser.parse_args()

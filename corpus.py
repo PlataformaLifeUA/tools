@@ -1,5 +1,6 @@
 import csv
 from abc import ABC, ABCMeta, abstractmethod
+from os.path import isdir, basename, dirname
 from random import randint
 from typing import List, Tuple, Dict, Any, Union
 
@@ -31,10 +32,13 @@ class Corpus(ABC):
     def folder(self) -> str:
         return self.__folder
 
-    def __init__(self, folder: str = 'data'):
-        if not path.exists(folder):
-            mkdir(folder)
-        self.__folder = folder
+    def __init__(self, file_or_folder: str = 'data'):
+        if not path.exists(file_or_folder):
+            mkdir(file_or_folder)
+        if isdir(file_or_folder):
+            self.__folder = file_or_folder
+        else:
+            self.__folder = dirname(file_or_folder)
 
     def __iter__(self):
         return self.corpus.__iter__()
@@ -60,19 +64,25 @@ class LifeCorpus(AnnotatedCorpus):
 
     @property
     def fname(self) -> str:
+        if self.__file:
+            return self.__file
         return self.__gold_file.replace('.csv', f'_{self.lang}.csv')
 
-    def __init__(self, folder: str = 'data', lang: str = 'en'):
-        super().__init__(folder)
+    def __init__(self, file_or_folder: str = 'data', lang: str = 'en'):
+        super().__init__(file_or_folder)
+        self.__file = None if isdir(file_or_folder) else file_or_folder
         self.lang = lang
-        self.__gold_file = path.join(self.folder, GOLD_STANDARD_CORPUS)
-        if not path.exists(self.__gold_file):
-            self.download()
-        if not path.exists(self.fname):
-            self.__corpus = self.__load(self.__gold_file)
-            self.translate('en')
-            self.save()
-        self.__corpus = self.__load(self.fname)
+        if self.__file:
+            self.__corpus = self.__load(self.__file)
+        else:
+            self.__gold_file = path.join(self.folder, GOLD_STANDARD_CORPUS)
+            if not path.exists(self.__gold_file):
+                self.download()
+            if not path.exists(self.fname):
+                self.__corpus = self.__load(self.__gold_file)
+                self.translate('en')
+                self.save()
+            self.__corpus = self.__load(self.fname)
 
     def save(self, fname: str = None, encoding: str = 'utf-8') -> None:
         save_csv(self.__corpus, fname if fname else self.fname, encoding)

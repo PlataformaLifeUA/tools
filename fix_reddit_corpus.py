@@ -118,6 +118,7 @@ def save_reddit(evaluations: List[Dict[str, str]], fname: str) -> None:
     if evaluations:
         with open(fname, 'wt') as file:
             writer = csv.DictWriter(file, fieldnames=evaluations[0].keys())
+            writer.writeheader()
             for evaluation in tqdm(evaluations, desc='Writing the corrected evaluations'):
                 writer.writerow(evaluation)
     else:
