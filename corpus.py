@@ -104,7 +104,7 @@ class LifeCorpus(AnnotatedCorpus):
                 corpus['Language'].append(row['Language'] if 'Language' in row else 'en')
                 corpus['Text'].append(row['Text'] if 'Text' in row else row['text'])
                 corpus['Alert level'].append(row['Alert level'] if 'Alert level' in row else row['cls'])
-                corpus['Message types'].append(row['Message types'] if 'Message type' else 'Unknown')
+                corpus['Message types'].append(row['Message types'] if 'Message types' in row else 'Unknown')
 
         return corpus
 
