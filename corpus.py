@@ -101,10 +101,10 @@ class LifeCorpus(AnnotatedCorpus):
         with open(fname, "r", encoding=encoding) as file:
             reader = csv.DictReader(file)
             for row in tqdm(reader, desc='Loading the corpus'):
-                corpus['Language'].append(row['Language'])
-                corpus['Text'].append(row['Text'])
-                corpus['Alert level'].append(row['Alert level'])
-                corpus['Message types'].append(row['Message types'])
+                corpus['Language'].append(row['Language'] if 'Language' in row else 'en')
+                corpus['Text'].append(row['Text'] if 'Text' in row else row['text'])
+                corpus['Alert level'].append(row['Alert level'] if 'Alert level' in row else row['cls'])
+                corpus['Message types'].append(row['Message types'] if 'Message type' else 'Unknown')
 
         return corpus
 
