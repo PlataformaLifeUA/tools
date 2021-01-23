@@ -47,7 +47,7 @@ class WordEmbeddings(object):
     """
     Class to get synonyms from word previosly generated embeddings.
     """
-    def __init__(self, languages: Union[str, List[str]], folder: str, neighbors: int = 1000, threshold: float = 0.95):
+    def __init__(self, languages: Union[str, List[str]], folder: str = 'data', neighbors: int = 1000, threshold: float = 0.95):
         """
         Constructor.
         :param languages: The languages to support.

@@ -67,7 +67,7 @@ def main():
     args = LifeArgParser()
     corpus = LifeCorpus(args.data, args.lang)
     
-    embeddings = WordEmbeddings(args.lang, args.data, args.embeddings, args.embedding_threshold)
+    embeddings = WordEmbeddings(args.lang, 'data', args.embeddings, args.embedding_threshold)
     if args.evaluate:
         measures = []
         for i in range(30):
