@@ -109,13 +109,13 @@ def removing_stop_words_tokenize(text) -> List[str]:
     return filtered_sentence
 
 
-def stemmer(text) -> List[str]:
+def stemmer(tokens: List[str]) -> List[str]:
     """
     Stemize verbs in list of tokenized words
     """
     lemmatizer = stem.WordNetLemmatizer()
     lemmas = []
-    for word in text:
+    for word in tokens:
         lemma = lemmatizer.lemmatize(word, pos='v')
         lemmas.append(lemma)
     return lemmas
@@ -137,7 +137,7 @@ def preprocess(text: str) -> List[str]:
     # Eliminar stop_words y tokenizar
     tokens = removing_stop_words_tokenize(text)
     # Lematización
-    tokens = stemmer(text)
+    tokens = stemmer(tokens)
 
     return tokens
 

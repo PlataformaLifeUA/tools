@@ -1,8 +1,7 @@
 import csv
 import json
 import sys
-from os import mkdir, path
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 
 from gensim import models
 from sklearn.cluster import KMeans
