@@ -55,12 +55,20 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10):
 
 
 def main() -> None:
-    corpus = LifeCorpus()
+    corpus = LifeCorpus('../corpus/reddit/reddit_corpus_agree.csv')
     measures = []
     for i in range(30):
         measures.append(cross_validation(corpus))
         print_metrics(measures[-1])
-    with open('results/rasa_evaluation.json', 'wt') as file:
+    with open('results/rasa_reddit_corpus_agree2.json', 'wt') as file:
+        json.dump(measures, file)
+
+    corpus = LifeCorpus('../corpus/reddit/gold_reddit_corpus_agree.csv')
+    measures = []
+    for i in range(30):
+        measures.append(cross_validation(corpus))
+        print_metrics(measures[-1])
+    with open('results/rasa_gold_reddit_corpus_agree.json', 'wt') as file:
         json.dump(measures, file)
 
 
