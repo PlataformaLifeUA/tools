@@ -43,7 +43,7 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10):
         train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
         y_train = reduce_classes(y_train, {'No risk': ['No risk'], 'Risk': ['Possible', 'Risk', 'Urgent', 'Immediate']})
         y_test = reduce_classes(y_test, {'No risk': ['No risk'], 'Risk': ['Possible', 'Risk', 'Urgent', 'Immediate']})
-        ml = RasaWrapper('data/rasa')
+        ml = RasaWrapper('data/')
         ml.train(train_corpus, y_train)
         y_pred = [x[0] for x in ml.evaluate(test_corpus)]
         y_test = [0 if x == 'No risk' else 1 for x in y_test]
@@ -60,7 +60,7 @@ def main() -> None:
     for i in range(30):
         measures.append(cross_validation(corpus))
         print_metrics(measures[-1])
-    with open('results/rasa_reddit_corpus_agree2.json', 'wt') as file:
+    with open('results/rasa_reddit_corpus_agree.json', 'wt') as file:
         json.dump(measures, file)
 
     corpus = LifeCorpus('../corpus/reddit/gold_reddit_corpus_agree.csv')
