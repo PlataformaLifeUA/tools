@@ -1,0 +1,30 @@
+{
+  "generic":  {
+    " copyright symbol ": "© *(symbols?)?",
+    " registered trademark symbol ": "® *(symbols?)?",
+    "&": " and ",
+    "European Union Trade Mark": ["\\bEUTM\\b", "\\bEUTMs\\b"],
+    "European Union Intellectual Property Office": "\\bEUIPO\\b",
+    "Small and Medium size Enterprises": "\\bSME\\b",
+    "European Data Protection Board": "\\bEDPB\\b",
+    "General Data Protection Regulation": "\\bGDPR\\b",
+    "World Intellectual Property Organization": "\\bWIPO\\b",
+    "ok": ["\\bokey\\b", "\\bokay\\b" ,"\\bdokey\\b", "\\bok( *ok)+\\b"],
+    " ": "!| *-+ *",
+    "'": "[’\"«»”“]"
+  },
+  "en": {
+    "I do not understand": "^\\?$",
+    "bye": ["\\bc +you\\b", "\\bsee *u\\b", "\\bsee+ *you\\b", "\\bc *u\\b", "\\bgoo+d *by+e+\\b", "\\bby+e+( *by+e+)*\\b"],
+    "thank you": ["\\bthank u\\b", "\\bthank\\b(?!\\W+you)\\b", "\\bty\\b", "\\btu\\b", "\\bta\\b", "\\bthx\\b", "\\bthanks\\b"],
+    "why": "\\by\\b",
+    "ha ha": "\\bha( *ha)+\\b",
+    "can you": "\\bcan +u\\b",
+    "no": ["nop", "nope", "none"],
+    "yes": ["\\byeah\\b", "\\byea\\b", "\\byep\\b", "\\byes( *yes)+\\b"],
+    "hello": ["\\bhey\\b", "\\bhi\\b", "\\bhello( *hello)+\\b"],
+    "to be": "\\b2b\\b",
+    "i want": ["\\bi +wish\\b", "\\bi +would +like\\b"],
+    "don't": ["\\bdont\\b", "\\bdoesnt\\b", "\\bdidnt\\b"]
+  }
+}
