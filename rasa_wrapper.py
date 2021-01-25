@@ -11,8 +11,8 @@ from yaml import dump
 
 from utils import save_yaml
 
-DOMAIN_FILE = 'domain.yml'
-CONFIG_FILE = 'config.yml'
+DOMAIN_FILE = 'rasa/domain.yml'
+CONFIG_FILE = 'rasa/config.yml'
 NLU_FILE = 'nlu.yml'
 MODEL_FILE = 'models/test.tar.gz'
 
@@ -22,8 +22,8 @@ class RasaWrapper(object):
         self.folder = folder
 
     def train(self, corpus: List[str], y_train: List[str]) -> None:
-        domain_file = os.path.join(self.folder, DOMAIN_FILE)
-        config_file = os.path.join(self.folder, CONFIG_FILE)
+        domain_file = DOMAIN_FILE
+        config_file = CONFIG_FILE
         nlu_file = os.path.join(self.folder, NLU_FILE)
         if not os.path.exists(self.folder):
             os.mkdir(self.folder)
