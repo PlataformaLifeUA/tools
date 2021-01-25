@@ -65,7 +65,7 @@ def join_corpus(reddit: List[Dict[str, List[str]]], gold: List[Dict[str, List[st
         elif mode.upper() == AGREE:
             classes = sample['cls']
             if all(cls == classes[0] for cls in classes):
-                corpus.append({'text': sample, 'cls': [classes[0]]})
+                corpus.append({'text': sample['text'], 'cls': [classes[0]]})
         else:
             raise ValueError(f'The mode "{mode}" is not allowed, only {ALL} or {AGREE}.')
 

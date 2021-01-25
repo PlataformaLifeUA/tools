@@ -1,5 +1,6 @@
 import csv
 import pickle
+import numpy as np
 from os.path import exists
 
 import pandas as pd
@@ -66,14 +67,15 @@ class FormatError(Exception):
 def load_evaluations(files: List[str]) -> List[Dict[str, str]]:
     corpus = []
     for file in tqdm(files, desc='Loading evaluations'):
-        df = pd.read_excel(file)
+        df = pd.read_excel(file).replace(np.nan, '', regex=True)
         for i in range(len(df)):
             try:
-                corpus.append({
-                    'evaluator': df['Evaluator'][i],
-                    'text': df['Text'][i],
-                    'cls': df['Classification'][i]
-                })
+                if df['Text'][i]:
+                    corpus.append({
+                        'evaluator': df['Evaluator'][i],
+                        'text': df['Text'][i],
+                        'cls': df['Classification'][i]
+                    })
             except KeyError as e:
                 raise FormatError(f'In file "{file}: {e}"')
     return corpus
