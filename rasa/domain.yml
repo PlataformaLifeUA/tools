@@ -1,0 +1,16 @@
+version: '2.0'
+
+intents:
+- no_risk
+- risk
+
+stories:
+- story: no_risk
+  steps:
+  - intent: no_risk
+  - action: action_no_risk
+- story: risk
+  steps:
+  - intent: risk
+  - action: action_risk
+
