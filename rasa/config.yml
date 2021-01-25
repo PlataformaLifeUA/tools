@@ -7,7 +7,7 @@ pipeline:
 # # If you'd like to customize it, uncomment and adjust the pipeline.
 # # See https://rasa.com/docs/rasa/tuning-your-model for more information.
   - name: "pipeline.Replace"
-    rules: "data/replace.json"
+    rules: "rasa/replace.json"
     force: false  # false if you want to use the rules used in the training process, otherwise, it always forces to load the file. The true is used to in developing testing to avoid retraining each time you change the rules. The true value will not work in production. By default false.
   - name: "SpacyNLP" # Initializes spacy structures. Every spacy component relies on this, hence this should be put at the beginning of every pipeline that uses any spacy components.
     model: "en"
