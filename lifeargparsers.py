@@ -58,7 +58,7 @@ class LifeArgParser(object):
 
     @property
     def repetitions(self) -> int:
-        return self._args.repetitions
+        return self.__args.repetitions
 
     def __init__(self):
         parser = ArgumentParser(description='Train, evaluate and increase the corpus using boostraping techniques')
