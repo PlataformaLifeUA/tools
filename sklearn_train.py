@@ -69,7 +69,7 @@ def main():
     embeddings = WordEmbeddings(args.lang, 'data', args.embeddings, args.embedding_threshold)
     if args.evaluate:
         measures = []
-        for i in range(30):
+        for i in range(args.repetitions):
             measures.append(cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml))
             print_metrics(measures[-1])
         with open(args.output, 'wt') as file:

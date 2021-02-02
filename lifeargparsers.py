@@ -56,6 +56,10 @@ class LifeArgParser(object):
     def output(self) -> str:
         return self.__args.output
 
+    @property
+    def repetitions(self) -> int:
+        return self._args.repetitions
+
     def __init__(self):
         parser = ArgumentParser(description='Train, evaluate and increase the corpus using boostraping techniques')
         parser.add_argument('-l', '--lang', metavar='LANG', type=str, default='en', help='The corpus language.')
@@ -74,14 +78,17 @@ class LifeArgParser(object):
                             help='The include boostrapping process or not. By default yes.')
         parser.add_argument('-c', '--cross', metavar='NUM', type=int, default=10,
                             help='The cross validation folder. By default 10.')
-        parser.add_argument('-n', '--no_risk', metavar='VALUE', type=float, default=0.2,
+        parser.add_argument('--no_risk', metavar='VALUE', type=float, default=0.2,
                             help='The confidence of no risk samples in the boostrapping. By default 0.2.')
-        parser.add_argument('-r', '--risk', metavar='VALUE', type=float, default=0.2,
+        parser.add_argument('--risk', metavar='VALUE', type=float, default=0.2,
                             help='The confidence of risk samples in the boostrapping. By default 0.2')
         parser.add_argument('-f', '--file', metavar='FILE', type=str, required=True,
                             help='The output file to store the boostrapped corpus.')
         parser.add_argument('-m', '--ml', metavar='NAME', type=str, choices=CLASSIFIERS, default='SVM',
                             help=f'The classifier name. Available values: {CLASSIFIERS}.')
+        parser.add_argument('-r', '--repetitions', metavar='NUM', type=int, default=30,
+                            help='How many time the experiments are repeated.')
         parser.add_argument('-o', '--output', metavar='FILE', type=str, required=True,
                             help=f'The file to store the results in json format.')
+
         self.__args = parser.parse_args()

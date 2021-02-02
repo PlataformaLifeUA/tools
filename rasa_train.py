@@ -18,10 +18,18 @@ class ArgParser(object):
     def output(self) -> str:
         return self._args.output
 
+    @property
+    def repetitions(self) -> int:
+        return self._args.repetitions
+
     def __init__(self):
         parser = ArgumentParser(description='Train with cross validation.')
-        parser.add_argument('-f', '--file', metavar='FILE', type=str, required=True, help='The file path to the corpus.')
-        parser.add_argument('-o', '--output', metavar='FILE', type=str, required=True, help='The file with the results.')
+        parser.add_argument('-f', '--file', metavar='FILE', type=str, required=True,
+                            help='The file path to the corpus.')
+        parser.add_argument('-o', '--output', metavar='FILE', type=str, required=True,
+                            help='The file with the results.')
+        parser.add_argument('-r', '--repetitions', metavar='NUM', type=int, default=30,
+                            help='How many time the experiments are repeated.')
         self._args = parser.parse_args()
 
 def invert_dict(dictionary: Dict[Any, Any]) -> Dict[Any, Any]:
@@ -74,7 +82,7 @@ def main() -> None:
     args = ArgParser()
     corpus = LifeCorpus(args.file)
     measures = []
-    for i in range(30):
+    for i in range(args.repetitions):
         measures.append(cross_validation(corpus))
         print_metrics(measures[-1])
     with open(args.output, 'wt') as file:
