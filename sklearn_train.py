@@ -1,6 +1,8 @@
 import csv
 import json
 import sys
+from concurrent.futures.thread import ThreadPoolExecutor
+from os import cpu_count
 from typing import List, Tuple
 
 from gensim import models
@@ -69,9 +71,13 @@ def main():
     embeddings = WordEmbeddings(args.lang, 'data', args.embeddings, args.embedding_threshold)
     if args.evaluate:
         measures = []
-        for i in range(args.repetitions):
-            measures.append(cross_validation(corpus, args.cross_folder, embeddings, args.lang, args.ml))
-            print_metrics(measures[-1])
+        with ThreadPoolExecutor(cpu_count()) as executor:
+            futures = []
+            for i in range(args.repetitions):
+                futures.append(executor.submit(cross_validation, corpus, args.cross_folder, embeddings, args.lang, args.ml))
+            for future in futures:
+                measures.append(future.result())
+                print_metrics(measures[-1])
         with open(args.output, 'wt') as file:
             json.dump(measures, file)
     sys.exit()
