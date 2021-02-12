@@ -180,7 +180,7 @@ def expand_wordembedding(sample: List[Tuple[int, int]], dictionary: Dictionary, 
 def corpus2bow(corpus: List[List[str]], dictionary: Dictionary, embedings: WordEmbeddings = None,
                lang: str = 'en', fixed: bool = False) -> List[List[Tuple[int, float]]]:
     bow_corpus = []
-    for sample in tqdm(corpus, desc='Obtaining the corpus BoW'):
+    for sample in corpus:
         bow_corpus.append(expand_wordembedding(dictionary.doc2bow(sample), dictionary, embedings, lang, fixed))
     return bow_corpus
 

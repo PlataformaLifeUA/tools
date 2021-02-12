@@ -162,6 +162,6 @@ def load_corpus(fname: str, encoding: str = 'utf-8') -> List[str]:
 
 def preprocess_corpus(corpus: List[str]) -> List[List[str]]:
     result = []
-    for sample in tqdm(corpus, desc='Preprocesing the corpus'):
+    for sample in corpus:
         result.append(preprocess(sample))
     return result

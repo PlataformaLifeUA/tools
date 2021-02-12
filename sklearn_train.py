@@ -49,6 +49,7 @@ def cross_validation(corpus:  LifeCorpus, folders: int = 10, embedings: WordEmbe
         X_test, _, _ = corpus2matrix(test_corpus, dictionary, 'TF/IDF', embedings, lang, True)
 
         y_pred = evaluate(X_test, ml)
+        print(y_pred)
         measures = metrics(y_test, y_pred)
         increase_measures(sum_measures, measures)
 
@@ -71,11 +72,11 @@ def main():
     embeddings = WordEmbeddings(args.lang, 'data', args.embeddings, args.embedding_threshold)
     if args.evaluate:
         measures = []
-        with ThreadPoolExecutor(cpu_count()) as executor:
+        with ThreadPoolExecutor(args.threads if args.threads else cpu_count()) as executor:
             futures = []
             for i in range(args.repetitions):
                 futures.append(executor.submit(cross_validation, corpus, args.cross_folder, embeddings, args.lang, args.ml))
-            for future in futures:
+            for future in tqdm(futures, desc='Obtaining results'):
                 measures.append(future.result())
                 print_metrics(measures[-1])
         with open(args.output, 'wt') as file:

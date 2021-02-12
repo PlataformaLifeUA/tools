@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from os import cpu_count
 
 CLASSIFIERS = ['SVM', 'kmeans']
 
@@ -27,6 +28,10 @@ class LifeArgParser(object):
     @property
     def eval_file(self) -> str:
         return self.__args.eval_file
+
+    @property
+    def threads(self) -> int:
+        return self.__args.threads
 
     @property
     def boostrapping(self) -> bool:
@@ -74,6 +79,8 @@ class LifeArgParser(object):
                             help='If it is evaluate or not. By default no.')
         parser.add_argument('-ef', '--eval_file', metavar='FILE', type=str,
                             help='The output file to store the evaluation result.')
+        parser.add_argument('-t', '--threads', metavar='VALUE', type=int, default=0,
+                            help='The number of CPUs to use to process. By default all CPUs are used.')
         parser.add_argument('-b', '--boostrapping', default=True, action='store_false',
                             help='The include boostrapping process or not. By default yes.')
         parser.add_argument('-c', '--cross', metavar='NUM', type=int, default=10,
@@ -92,3 +99,5 @@ class LifeArgParser(object):
                             help=f'The file to store the results in json format.')
 
         self.__args = parser.parse_args()
+        if self.__args.threads > cpu_count():
+            raise ValueError(F'The number of threads cannot be greater than the number of CPUs: {cpu_count()}.')
