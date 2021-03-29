@@ -1,3 +1,5 @@
+import json
+import pickle
 from collections import OrderedDict
 from typing import Dict, List, Union
 
@@ -57,3 +59,23 @@ def save_csv(corpus, fname: str, encoding: str = 'utf-8') -> None:
 def save_yaml(d: OrderedDict, fname: str) -> None:
     with open(fname, 'wt') as file:
         yaml.dump(d, file, Dumper=Dumper, default_flow_style=False)
+
+
+def load_json(fname:str, encoding: str = 'utf-8') -> dict:
+    with open(fname, 'rt', encoding=encoding) as file:
+        return json.load(file)
+
+
+def save_json(d: dict, fname:str, encoding: str = 'utf-8') -> None:
+    with open(fname, 'wt', encoding=encoding) as file:
+        json.dump(d, file)
+
+
+def load_pickle(fname: str) -> object:
+    with open(fname, 'rb') as file:
+        return pickle.load(file)
+
+
+def save_pickle(obj: object, fname: str) -> None:
+    with open(fname, 'wb') as file:
+        pickle.dump(obj, file)

@@ -136,3 +136,4 @@ data/
 models/
 /.buffer
 /results/
+/.embeddings.cache

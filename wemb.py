@@ -7,7 +7,10 @@ from polyglot.text import Text
 import nltk
 import logging
 
+from utils import load_json, save_json, save_pickle, load_pickle
+
 EMBEDDINGS_FILE = 'embeddings_pkl.tar.bz2'
+DEF_CACHE_FILE = '.embeddings-{}-threshold-{}.cache'
 log = logging.getLogger()
 # List of the supported languages and their full names
 lang_name = {
@@ -53,11 +56,13 @@ class WordEmbeddings(object):
         :param languages: The languages to support.
         :param folder: The folder where the embeddings models and stopword lists will be stored.
         """
-        self.embeddings = self.download_embeddings(languages, folder)
+        embeddings = self.download_embeddings(languages, folder)
+        self.embeddings = {lang: embed.normalize_words() for lang, embed in embeddings.items()}
         self.stopwords = self.download_stopwords(languages, folder)
         self.neighbors = neighbors
         self.threshold = threshold
-        self.caches = {lang: {} for lang in self.embeddings}
+        self.__cache_file = DEF_CACHE_FILE.format(neighbors, threshold)
+        self.caches = load_pickle(self.__cache_file) if exists(self.__cache_file) else {lang: {} for lang in embeddings}
 
     def synonyms(self, term: str, lang: str = 'en') -> List[str]:
         """
@@ -68,16 +73,16 @@ class WordEmbeddings(object):
         """
         if lang not in self.embeddings:
             raise InvalidLanguage(f'The language code "{lang}" is not supported in the current version.')
-        embeddings = self.embeddings[lang].normalize_words()
         cache = self.caches[lang]
         if term in cache:
             return cache[term]
+        embeddings = self.embeddings[lang]
         synonyms = []
         if len(term) > 1 and term.lower() not in self.stopwords and term in embeddings:
             neighbors = embeddings.nearest_neighbors(term, self.neighbors)
             synonyms = list(zip(neighbors, embeddings.distances(term, neighbors)))
         cache[term] = [t for t in synonyms if t[1] > self.threshold]
-
+        save_pickle(self.caches, self.__cache_file)
         return cache[term]
 
     @staticmethod
