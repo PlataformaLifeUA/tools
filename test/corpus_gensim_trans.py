@@ -101,8 +101,9 @@ class MyTestCase(unittest.TestCase):
             for sample in corpus:
                 pass
             print(sample)
+
             self.assertEqual(sample.cls, 1)
-            self.assertEqual(len(sample), 1)
+            self.assertEqual(corpus[-2].cls, 0)
 
 
 if __name__ == '__main__':

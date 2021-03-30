@@ -29,7 +29,7 @@ class Corpus(ABC, Iterable):
         self._transformers = transformers
 
     def train(self) -> 'ArrayCorpus':
-        corpus = ArrayCorpus(transformers=self.transformers, metadata=self.metadata)
+        corpus = ArrayCorpus(transformers=self.transformers, metadata=self._metadata)
         self.transformers.start_training()
         try:
             while True:
@@ -37,6 +37,7 @@ class Corpus(ABC, Iterable):
         except StopIteration:
             self.transformers.finish_training()
         self._metadata.update(self.transformers.attributes)
+        corpus._metadata = self._metadata
         return corpus
 
     @abstractmethod
