@@ -1,4 +1,5 @@
 import unittest
+from random import Random
 
 from corptrans.corpus.corpus import ArrayCorpus
 from corptrans.corpus.csv import CsvCorpus
@@ -16,9 +17,11 @@ class MyTestCase(unittest.TestCase):
             corpus.add_transformer(CsvTransformer('text', 'cls'))
             corpus.add_transformer(ClassReduction({0: ['No risk'], 1: ['Possible', 'Risk', 'Urgent', 'Immediate']}))
             corpus = ArrayCorpus(corpus)
-            train_corpus, test_corpus = corpus.divide(0.9, 2)
-            train_corpus.save('data/gold_reddit_train.csv.gz', 'text')
-            test_corpus.save('data/gold_reddit_test.csv.gz', 'text')
+            r = Random()
+            for i in range(10):
+                train_corpus, test_corpus = corpus.divide(0.9, r.randint(0, 10000000))
+                train_corpus.save(f'data/gold_reddit_train-{i}.csv.gz', 'text')
+                test_corpus.save(f'data/gold_reddit_test-{i}.csv.gz', 'text')
             # train_corpus = corpus_trainer(train_corpus)
             # ml = create_ml(corpus2matrix(train_corpus), train_corpus.classes(), 'SVM')
             # test_corpus._metadata = train_corpus.metadata

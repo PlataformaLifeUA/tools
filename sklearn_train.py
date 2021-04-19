@@ -87,7 +87,8 @@ def evaluate(ml, fname: str, corpus: Corpus) -> dict:
 def main() -> None:
     args = SkLearnSimpleArgParser()
     ml, corpus = train(args.corpus, args.method)
-    print_metrics(evaluate(ml, args.test, corpus))
+    measures = evaluate(ml, args.test, corpus)
+    print_metrics(measures)
     # with CsvCorpus(args.test) as test_corpus:
     #     test_corpus.set_transformers(corpus.transformers)
     #     test_corpus = ArrayCorpus(test_corpus)
