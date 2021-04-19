@@ -8,7 +8,7 @@ from corpustrans.transformers.embeddings import EmbeddingExtension
 from corpustrans.transformers.gensim import Tokens2Freq, Dict2Tuples, BoW, TfIdf, Lsi, Lda, Gensim2Matrix
 from corpustrans.transformers.preprocess import Preprocess
 from corpustrans.transformers.base import CsvTransformer, ClassReduction
-from sklearn_train import create_ml
+from sklearn_train_old_ import create_ml
 
 
 def corpus2matrix(corpus: Corpus) -> lil_matrix:

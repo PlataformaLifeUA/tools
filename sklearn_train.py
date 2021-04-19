@@ -1,133 +1,110 @@
-import csv
-import json
-import sys
-from concurrent.futures.thread import ThreadPoolExecutor
-from os import cpu_count
-from typing import List, Tuple
+from argparse import ArgumentParser
 
-from gensim import models
-from sklearn.cluster import KMeans
-from tqdm import tqdm
+from scipy.sparse import lil_matrix
 
-from corpus import corpus2matrix, divide_corpus, features2matrix, expand_wordembedding, LifeCorpus, RedditCorpus
-from eval import evaluate, metrics, print_metrics
-from lifeargparsers import LifeArgParser
-from preproc import preprocess
-from gensim.corpora import Dictionary
-import logging
-from sklearn.svm import SVC
+from corptrans import Corpus, Transformers
+from corptrans.corpus.corpus import ArrayCorpus
+from corptrans.corpus.csv import CsvCorpus
+from corptrans.transformers import ClassReduction
+from corptrans.transformers.csv import CsvTransformer
+from corptrans.transformers.embeddings import EmbeddingExtension
+from corptrans.transformers.gensim import Tokens2Freq, Dict2Tuples, BoW, TfIdf
+from corptrans.transformers.preprocess import Preprocess
+from eval import print_metrics, metrics
+from sklearn_train_old_ import create_ml
 
-from wemb import WordEmbeddings
-
-log = logging.getLogger(__name__)
+SVM = 'svm'
+KMEANS = 'kmeans'
+CLASSIFIERS = [SVM, KMEANS]
 
 
-def increase_measures(total_measures: dict, measures: dict):
-    for key, value in measures.items():
-        if key in total_measures:
-            total_measures[key] += value
-        else:
-            total_measures[key] = value
+class SkLearnSimpleArgParser(object):
+    @property
+    def corpus(self) -> str:
+        return self._args.corpus
+
+    @property
+    def test(self) -> str:
+        return self._args.test[0]
+
+    @property
+    def method(self) -> str:
+        return self._args.method
+
+    def __init__(self) -> None:
+        parser = ArgumentParser(description='Create a model from a train corpus an evaluate it with other test corpus.')
+        self.set_arguments(parser)
+        self._args = parser.parse_args()
+
+    @staticmethod
+    def set_arguments(parser: ArgumentParser) -> None:
+        parser.add_argument('-c', '--corpus', metavar='TRAIN_FILE', type=str, required=True,
+                            help='The path to CSV corpus file.')
+        parser.add_argument('test', metavar='TEST_FILE', type=str, nargs=1,
+                            help='The path to CSV test file.')
+        parser.add_argument('-m', '--method', metavar='METHOD', type=str, default=SVM, choices=CLASSIFIERS,
+                            help='The path to CSV test file.')
 
 
-def div_measures(total_measures: dict, divisor: int) -> dict:
-    measures = {}
-    for key, value in total_measures.items():
-        measures[key] = value / divisor
-    return measures
+def corpus2matrix(corpus: Corpus) -> lil_matrix:
+    M = lil_matrix((len(corpus), len(corpus.metadata['dictionary'])))
+    for i, sample in enumerate(corpus):
+        for token in sample:
+            M[i, token[0]] = token[1]
+    return M
 
 
-def cross_validation(corpus:  LifeCorpus, folders: int = 10, embedings: WordEmbeddings = None,
-                     lang: str = 'en', cl: str = 'SVM'):
-    sum_measures = {}
-    for i in range(folders):
-        train_corpus, test_corpus, y_train, y_test = divide_corpus(corpus, 1 - 100 / (folders * 100))
-        dictionary = Dictionary(train_corpus)
-        X_train, _, _ = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
-        ml = create_ml(X_train, y_train, cl)
-
-        X_test, _, _ = corpus2matrix(test_corpus, dictionary, 'TF/IDF', embedings, lang, True)
-
-        y_pred = evaluate(X_test, ml)
-        print(y_pred)
-        measures = metrics(y_test, y_pred)
-        increase_measures(sum_measures, measures)
-
-    return div_measures(sum_measures, folders)
+def train(fname: str, ml: str):
+    with CsvCorpus(fname) as corpus:
+        corpus.add_transformer(CsvTransformer('text', 'cls'))
+        corpus.add_transformer(ClassReduction({0: ['No risk'], 1: ['Possible', 'Risk', 'Urgent', 'Immediate']}))
+        train_corpus = corpus_trainer(corpus)
+    return create_ml(corpus2matrix(train_corpus), train_corpus.classes(), ml), train_corpus
 
 
-def create_ml(X_train, y_train, cl: str = 'SVM'):
-    if cl.lower() == 'kmeans':
-        ml = KMeans(2)
-    else:
-        ml = SVC(probability=True)
-    ml.fit(X_train, y_train)
-    return ml
+def corpus_trainer(corpus):
+    corpus.add_transformer(Preprocess())
+    corpus.add_transformer(Tokens2Freq())
+    # corpus.add_transformer(EmbeddingExtension('en', 10, 0.85))
+    corpus.add_transformer(Dict2Tuples())
+    corpus.add_transformer(BoW())
+    # corpus.add_transformer(TfIdf())
+    train_corpus = corpus.train()
+    return train_corpus
 
 
-def main():
-    args = LifeArgParser()
-    corpus = LifeCorpus(args.data, args.lang)
-    
-    embeddings = WordEmbeddings(args.lang, 'data', args.embeddings, args.embedding_threshold)
-    if args.evaluate:
-        measures = []
-        with ThreadPoolExecutor(args.threads if args.threads else cpu_count()) as executor:
-            futures = []
-            for i in range(args.repetitions):
-                futures.append(executor.submit(cross_validation, corpus, args.cross_folder, embeddings, args.lang, args.ml))
-            for future in tqdm(futures, desc='Obtaining results'):
-                measures.append(future.result())
-                print_metrics(measures[-1])
-        with open(args.output, 'wt') as file:
-            json.dump(measures, file)
-    sys.exit()
-    reddit_corpus = RedditCorpus(args.data)
-    results = []
-    it = 1
-    detected = detect_suicide_messages(corpus, reddit_corpus, args.no_risk ** it, args.risk ** it, embeddings, args.lang, args.ml)
-    while detected:
-        for i, no_risk_confidence, risk_confidence in reversed(detected):
-            text = reddit_corpus[i]
-            del reddit_corpus[i]
-            corpus['Language'].append('en')
-            corpus['Text'].append(text)
-            if risk_confidence > no_risk_confidence:
-                corpus['Alert level'].append('Urgent')
-            else:
-                corpus['Alert level'].append('No risk')
-            corpus['Message types'].append('Undefined')
-            results.append((it, no_risk_confidence, risk_confidence, text))
-
-        detected = detect_suicide_messages(corpus, reddit_corpus, args.no_risk ** it, args.risk ** it, embeddings, args.lang, args.ml)
-        it += 1
-
-    with open(args.file, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Iteration', 'No risk confidence', 'Risk confidence', 'Text'])
-        for result in results:
-            writer.writerow(result)
+def evaluate(ml, fname: str, corpus: Corpus) -> dict:
+    with CsvCorpus(fname) as test_corpus:
+        test_corpus.set_transformers(corpus.transformers)
+        test_corpus = ArrayCorpus(test_corpus)
+        test_corpus._metadata = corpus.metadata
+        X = corpus2matrix(test_corpus)
+        y = test_corpus.classes()
+        y_pred = [ml.predict(X[i])[0] for i in range(X.shape[0])]
+        return metrics(y, y_pred)
 
 
-def detect_suicide_messages(corpus: LifeCorpus, texts: RedditCorpus, nr_confidence: float, r_confidence: float,
-                            embedings: WordEmbeddings, lang: str = 'en',
-                            cl: str = 'SVM') -> List[Tuple[int, float, float]]:
-    train_corpus, _, y_train, _ = divide_corpus(corpus, 1)
-    dictionary = Dictionary(train_corpus)
-    X_train, bow_corpus, tfidf_corpus = corpus2matrix(train_corpus, dictionary, 'TF/IDF', embedings, lang)
-    ml = create_ml(X_train, y_train, cl)
-    tfidf = models.TfidfModel(bow_corpus)
-    detected = []
-    for i, text in tqdm(enumerate(texts), desc='Classifying Reddit corpus', total=len(texts)):
-        sample = preprocess(text)
-        bow_sample = expand_wordembedding(dictionary.doc2bow(sample), dictionary, embedings, lang, True)
-        tfidf_sample = tfidf[bow_sample]
-        X = features2matrix([tfidf_sample], dictionary)
-        y = ml.predict_proba(X[0])
-        if y[0][0] <= r_confidence or y[0][1] <= nr_confidence:
-            detected.append((i, y[0][0], y[0][1]))
-    return detected
-
+def main() -> None:
+    args = SkLearnSimpleArgParser()
+    ml, corpus = train(args.corpus, args.method)
+    print_metrics(evaluate(ml, args.test, corpus))
+    # with CsvCorpus(args.test) as test_corpus:
+    #     test_corpus.set_transformers(corpus.transformers)
+    #     test_corpus = ArrayCorpus(test_corpus)
+    #     test_corpus._metadata = corpus.metadata
+    #     X = corpus2matrix(test_corpus)
+    #     y = test_corpus.classes()
+    #     y_pred = [ml.predict(X[i])[0] for i in range(X.shape[0])]
+    #     print_metrics(metrics(y, y_pred))
+    # with CsvCorpus(args.test) as test_corpus:
+    #     test_corpus.add_transformer(CsvTransformer('text', 'cls'))
+    #     test_corpus.add_transformer(ClassReduction({0: ['No risk'], 1: ['Risk']}))
+    #     test_corpus = ArrayCorpus(test_corpus)
+    #
+    #     y_pred = [ml.predict(X[i])[0] for i in range(X.shape[0])]
+    #     print_metrics(metrics(y, y_pred))
+    #     for i, y1 in enumerate(y):
+    #         print(test_corpus[i], y_pred[i], sep=': ')
 
 if __name__ == '__main__':
     main()

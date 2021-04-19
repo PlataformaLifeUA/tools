@@ -6,7 +6,7 @@ from typing import List, Any, Dict
 from corpus import LifeCorpus
 from eval import metrics, print_metrics
 from rasa_wrapper import RasaWrapper
-from sklearn_train import increase_measures, div_measures
+from sklearn_train_old_ import increase_measures, div_measures
 
 
 class ArgParser(object):

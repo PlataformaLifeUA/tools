@@ -10,7 +10,7 @@ from tqdm import tqdm
 from corpus import divide_corpus, LifeCorpus
 from eval import metrics
 from preproc import preprocess_corpus
-from sklearn_train import create_ml
+from sklearn_train_old_ import create_ml
 from wemb import WordEmbeddings
 
 DEF_CORPUS = 'data/gold_reddit_corpus_agree.csv'

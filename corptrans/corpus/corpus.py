@@ -2,6 +2,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from random import Random
 from typing import Tuple, List, Any, Iterable, Union
 
+from filedatasource import open_writer
+
 from corptrans import Sample
 from corptrans.transformers import Transformers, Transformer
 
@@ -70,6 +72,11 @@ class Corpus(ABC, Iterable):
 
     def samples(self) -> List[Sample]:
         return [sample for sample in self]
+
+    def save(self, file: str, features: str = 'features', cls: str = 'cls'):
+        with open_writer(file, fieldnames=[features, cls]) as writer:
+            for sample in self:
+                writer.write([sample.features, sample.cls])
 
 
 class ArrayCorpus(Corpus):

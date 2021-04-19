@@ -1,8 +1,5 @@
 import unittest
 
-from scipy.sparse import lil_matrix
-
-from corptrans import Corpus
 from corptrans.corpus.corpus import ArrayCorpus
 from corptrans.corpus.csv import CsvCorpus
 from corptrans.transformers import ClassReduction
@@ -11,15 +8,8 @@ from corptrans.transformers.embeddings import EmbeddingExtension
 from corptrans.transformers.gensim import Tokens2Freq, Dict2Tuples, BoW, TfIdf
 from corptrans.transformers.preprocess import Preprocess
 from eval import metrics, print_metrics
-from sklearn_train import create_ml
-
-
-def corpus2matrix(corpus: Corpus) -> lil_matrix:
-    M = lil_matrix((len(corpus), len(corpus.metadata['dictionary'])))
-    for i, sample in enumerate(corpus):
-        for token in sample:
-            M[i, token[0]] = token[1]
-    return M
+from sklearn_train import corpus2matrix
+from sklearn_train_old_ import create_ml
 
 
 class MyTestCase(unittest.TestCase):

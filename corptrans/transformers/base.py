@@ -105,4 +105,6 @@ class ClassReduction(NoTrainingTransformer):
     def transform(self, sample: Union[Sample, Any]) -> Union[Sample, Any]:
         if not isinstance(sample, Sample):
             return sample
+        if sample.cls not in self.__rules:
+            return sample
         return Sample(sample.features, self.__rules[sample.cls])
