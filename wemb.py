@@ -67,7 +67,7 @@ class WordEmbeddings(object):
     def synonyms(self, term: str, lang: str = 'en') -> List[str]:
         """
         Using the word embedding and given a text, get a list of synonyms from the text terms.
-        :param text: The text to obtain the synonyms.
+        :param term: The term to obtain the synonyms.
         :param lang: The language of that text.
         :return: the top relevant synonyms of the text terms.
         """

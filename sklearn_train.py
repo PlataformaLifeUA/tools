@@ -65,10 +65,10 @@ def train(fname: str, ml: str):
 def corpus_trainer(corpus):
     corpus.add_transformer(Preprocess())
     corpus.add_transformer(Tokens2Freq())
-    # corpus.add_transformer(EmbeddingExtension('en', 10, 0.85))
+    corpus.add_transformer(EmbeddingExtension('en', 10, 0.85))
     corpus.add_transformer(Dict2Tuples())
     corpus.add_transformer(BoW())
-    # corpus.add_transformer(TfIdf())
+    corpus.add_transformer(TfIdf())
     train_corpus = corpus.train()
     return train_corpus
 
